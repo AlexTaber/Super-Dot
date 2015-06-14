@@ -55,3 +55,13 @@ function clickEvent() {
     return false;
   }
 }
+
+function findPointFromAngle(startingPoint, distance, angle) {
+  if(angle == 180) angle = 0;
+  else if(angle == 0) angle = 180;
+  else if(angle == -90) angle = 270;
+  console.log("angle = " + angle);
+  new_x = startingPoint.x + Math.cos(Phaser.Math.degToRad(angle)) * distance;
+  new_y = startingPoint.y - Math.sin(Phaser.Math.degToRad(angle)) * distance;
+  return [new_x, new_y];
+}

@@ -6,10 +6,10 @@ var Guard = function(x,y,elevation,title,points) {
   this.speed = 2;
   this.patrolIndex = 0;
   this.points = [];
+  this.direction = 0;
   this.timeline = new Timeline(this);
   this.setUpPatrol(points);
   this.startPatrolTween();
-  this.direction = 0;
 }
 
 Guard.prototype.setAttributesByTitle = function(title) {
