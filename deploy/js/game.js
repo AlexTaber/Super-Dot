@@ -36,17 +36,17 @@ Area.prototype.draw = function() {
   game.graphics.drawRect(this.position.x, this.position.y, this.width, this.height);
   game.graphics.endFill();
 }
-var Guard = function(x,y,elevation,title,action,points) {
+var Guard = function(x,y,elevation,title,points) {
   this.position = new Phaser.Point(x,y);
   this.elevation = elevation;
   this.title = title;
   this.setAttributesByTitle(title);
-  this.action = action;
   this.speed = 2;
   this.patrolIndex = 0;
   this.points = [];
   this.setUpPatrol(points);
   this.startPatrolTween();
+  this.timeline = new Timeline(this);
 }
 
 Guard.prototype.setAttributesByTitle = function(title) {
@@ -56,22 +56,20 @@ Guard.prototype.setAttributesByTitle = function(title) {
   }
 }
 
-Guard.prototype.patrol = function(points) {
-  // if(this.tween.isRunning == false) {
-  //   this.patrolIndex = (this.patrolIndex + 1) % this.points.length;
-  //   console.log(this.patrolIndex)
-  //   this.tween.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, 2000, Phaser.Easing.Linear.None, true);
-  // }
+Guard.prototype.pause = function() {
+  console.log(this);
+  this.tween.pause();
+  game.time.events.add(Phaser.Timer.SECOND * 5, this.tween.resume, this.tween);
 }
 
 Guard.prototype.startPatrolTween = function() {
 
-  var p=game.add.tween(this.position);
+  this.tween=game.add.tween(this.position);
   this.patrolIndex = (this.patrolIndex + 1) % this.points.length;
   var distance = this.position.distance(this.points[this.patrolIndex])
 
-  p.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
-  p.onComplete.add(this.startPatrolTween, this);
+  this.tween.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+  this.tween.onComplete.add(this.startPatrolTween, this);
   //p.start();
 
 }
@@ -91,15 +89,35 @@ Guard.prototype.draw = function() {
 var Level = function() {
   this.areas = LEVEL_TEMPLATE[0][0];
   this.guards = LEVEL_TEMPLATE[0][1];
+  this.assignEvents();
 }
 
 Level.prototype.update = function() {
-  this.guardAction();
+  for(var i = 0; i < this.guards.length; i++) {
+    this.guards[i].timeline.checkForEvent();
+  }
 }
 
-Level.prototype.guardAction = function() {
-  for(var i = 0; i < this.guards.length; i++) {
-    this.guards[i].action();
+Level.prototype.assignEvents = function() {
+  eventArray = LEVEL_TEMPLATE[0][2];
+  for(var i = 0; i < eventArray.length; i++) {
+    this.guards[eventArray[i].guardIndex].timeline.events.push({ timelineIndex: eventArray[i].timelineIndex, action: eventArray[i].action })
+  }
+}
+
+var Timeline = function(guard) {
+  this.guard = guard
+  this.events = [];
+  this.eventsIndex = 0;
+}
+
+Timeline.prototype.checkForEvent = function() {
+  if(this.eventsIndex < this.events.length) {
+    if(this.events[this.eventsIndex].timelineIndex == game.timelineIndex) {
+      var myEvent = this.events[this.eventsIndex].action.bind(this.guard);
+      myEvent();
+      this.eventsIndex += 1;
+    }
   }
 }
 WIDTH = 320;
@@ -116,7 +134,7 @@ function setUpLevels() {
   LEVEL_TEMPLATE = [
     //level 0
     [
-      //areas
+      //area(x,y,width,height,elevation)
       [
         new Area(0,0,WIDTH,100,3),
         new Area(WIDTH * 0.2,100,WIDTH * 0.4,50,1),
@@ -129,9 +147,15 @@ function setUpLevels() {
         new Area(0, 380, WIDTH * 0.2, 40, 1),
         new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
       ],
-      //guards
+      //guards(x,y,elevation,title,patrolPoints)
       [
-        new Guard(50,50,1,"basic", Guard.prototype.patrol,[[50,50],[300,50],[300,190]])
+        new Guard(100,245,0,"basic",[[100,245],[280,245],[280,440],[100,440]]),
+        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]]),
+        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]])
+      ],
+      //events
+      [
+        { guardIndex: 0, action: Guard.prototype.pause, timelineIndex: 100 }
       ]
     ]
   ]
@@ -173,6 +197,8 @@ var state = {
         game.stage.backgroundColor = '#fff';
         game.graphics = game.add.graphics(0,0);
         game.clicked = false;
+        game.timelineIndex = 0;
+        game.timelineRunning = true;
 
     },
     preload: function() {
@@ -190,6 +216,10 @@ var state = {
       //click event
       if (clickEvent()){
         click();
+      }
+      //update timeline
+      if(game.timelineRunning) {
+        game.timelineIndex += 1;
       }
 
       level.update();

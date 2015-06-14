@@ -18,6 +18,8 @@ var state = {
         game.stage.backgroundColor = '#fff';
         game.graphics = game.add.graphics(0,0);
         game.clicked = false;
+        game.timelineIndex = 0;
+        game.timelineRunning = true;
 
     },
     preload: function() {
@@ -35,6 +37,10 @@ var state = {
       //click event
       if (clickEvent()){
         click();
+      }
+      //update timeline
+      if(game.timelineRunning) {
+        game.timelineIndex += 1;
       }
 
       level.update();

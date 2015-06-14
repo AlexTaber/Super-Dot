@@ -12,7 +12,7 @@ function setUpLevels() {
   LEVEL_TEMPLATE = [
     //level 0
     [
-      //areas
+      //area(x,y,width,height,elevation)
       [
         new Area(0,0,WIDTH,100,3),
         new Area(WIDTH * 0.2,100,WIDTH * 0.4,50,1),
@@ -25,9 +25,15 @@ function setUpLevels() {
         new Area(0, 380, WIDTH * 0.2, 40, 1),
         new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
       ],
-      //guards
+      //guards(x,y,elevation,title,patrolPoints)
       [
-        new Guard(50,50,1,"basic", Guard.prototype.patrol,[[50,50],[300,50],[300,190]])
+        new Guard(100,245,0,"basic",[[100,245],[280,245],[280,440],[100,440]]),
+        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]]),
+        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]])
+      ],
+      //events
+      [
+        { guardIndex: 0, action: Guard.prototype.pause, timelineIndex: 100 }
       ]
     ]
   ]
