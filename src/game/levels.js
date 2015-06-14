@@ -17,3 +17,21 @@ Level.prototype.assignEvents = function() {
     this.guards[eventArray[i].guardIndex].timeline.events.push({ timelineIndex: eventArray[i].timelineIndex, action: eventArray[i].action, duration: eventArray[i].duration })
   }
 }
+
+Level.prototype.draw = function() {
+  //levels
+  for(var l = 0; l < 4; l++) {
+    //areas
+    for(var i = 0; i < level.areas.length; i++) {
+      if(l == level.areas[i].elevation) level.areas[i].draw();
+    }
+    //guards LOS
+    for(var i = 0; i < level.guards.length; i++) {
+      if(l == level.guards[i].elevation) level.guards[i].drawLOS();
+    }
+    //guards
+    for(var i = 0; i < level.guards.length; i++) {
+      if(l == level.guards[i].elevation) level.guards[i].draw();
+    }
+  }
+}

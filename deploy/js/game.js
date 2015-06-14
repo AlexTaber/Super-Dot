@@ -24,6 +24,7 @@ b.exports=c,c.getUnvisitedNode=function(a){for(var b=a.length,c=0;c!==b;c++){var
 }}),Phaser.Physics.P2.FixtureList=function(a){Array.isArray(a)||(a=[a]),this.rawList=a,this.init(),this.parse(this.rawList)},Phaser.Physics.P2.FixtureList.prototype={init:function(){this.namedFixtures={},this.groupedFixtures=[],this.allFixtures=[]},setCategory:function(a,b){var c=function(b){b.collisionGroup=a};this.getFixtures(b).forEach(c)},setMask:function(a,b){var c=function(b){b.collisionMask=a};this.getFixtures(b).forEach(c)},setSensor:function(a,b){var c=function(b){b.sensor=a};this.getFixtures(b).forEach(c)},setMaterial:function(a,b){var c=function(b){b.material=a};this.getFixtures(b).forEach(c)},getFixtures:function(a){var b=[];if(a){a instanceof Array||(a=[a]);var c=this;return a.forEach(function(a){c.namedFixtures[a]&&b.push(c.namedFixtures[a])}),this.flatten(b)}return this.allFixtures},getFixtureByKey:function(a){return this.namedFixtures[a]},getGroup:function(a){return this.groupedFixtures[a]},parse:function(){var a,b,c,d;c=this.rawList,d=[];for(a in c)b=c[a],isNaN(a-0)?this.namedFixtures[a]=this.flatten(b):(this.groupedFixtures[a]=this.groupedFixtures[a]||[],this.groupedFixtures[a]=this.groupedFixtures[a].concat(b)),d.push(this.allFixtures=this.flatten(this.groupedFixtures))},flatten:function(a){var b,c;return b=[],c=arguments.callee,a.forEach(function(a){return Array.prototype.push.apply(b,Array.isArray(a)?c(a):[a])}),b}},Phaser.Physics.P2.PointProxy=function(a,b){this.world=a,this.destination=b},Phaser.Physics.P2.PointProxy.prototype.constructor=Phaser.Physics.P2.PointProxy,Object.defineProperty(Phaser.Physics.P2.PointProxy.prototype,"x",{get:function(){return this.world.mpx(this.destination[0])},set:function(a){this.destination[0]=this.world.pxm(a)}}),Object.defineProperty(Phaser.Physics.P2.PointProxy.prototype,"y",{get:function(){return this.world.mpx(this.destination[1])},set:function(a){this.destination[1]=this.world.pxm(a)}}),Object.defineProperty(Phaser.Physics.P2.PointProxy.prototype,"mx",{get:function(){return this.destination[0]},set:function(a){this.destination[0]=a}}),Object.defineProperty(Phaser.Physics.P2.PointProxy.prototype,"my",{get:function(){return this.destination[1]},set:function(a){this.destination[1]=a}}),Phaser.Physics.P2.InversePointProxy=function(a,b){this.world=a,this.destination=b},Phaser.Physics.P2.InversePointProxy.prototype.constructor=Phaser.Physics.P2.InversePointProxy,Object.defineProperty(Phaser.Physics.P2.InversePointProxy.prototype,"x",{get:function(){return this.world.mpxi(this.destination[0])},set:function(a){this.destination[0]=this.world.pxmi(a)}}),Object.defineProperty(Phaser.Physics.P2.InversePointProxy.prototype,"y",{get:function(){return this.world.mpxi(this.destination[1])},set:function(a){this.destination[1]=this.world.pxmi(a)}}),Object.defineProperty(Phaser.Physics.P2.InversePointProxy.prototype,"mx",{get:function(){return this.destination[0]},set:function(a){this.destination[0]=-a}}),Object.defineProperty(Phaser.Physics.P2.InversePointProxy.prototype,"my",{get:function(){return this.destination[1]},set:function(a){this.destination[1]=-a}}),Phaser.Physics.P2.Body=function(a,b,c,d,e){b=b||null,c=c||0,d=d||0,"undefined"==typeof e&&(e=1),this.game=a,this.world=a.physics.p2,this.sprite=b,this.type=Phaser.Physics.P2JS,this.offset=new Phaser.Point,this.data=new p2.Body({position:[this.world.pxmi(c),this.world.pxmi(d)],mass:e}),this.data.parent=this,this.velocity=new Phaser.Physics.P2.InversePointProxy(this.world,this.data.velocity),this.force=new Phaser.Physics.P2.InversePointProxy(this.world,this.data.force),this.gravity=new Phaser.Point,this.onBeginContact=new Phaser.Signal,this.onEndContact=new Phaser.Signal,this.collidesWith=[],this.removeNextStep=!1,this.debugBody=null,this._collideWorldBounds=!0,this._bodyCallbacks={},this._bodyCallbackContext={},this._groupCallbacks={},this._groupCallbackContext={},b&&(this.setRectangleFromSprite(b),b.exists&&this.game.physics.p2.addBody(this))},Phaser.Physics.P2.Body.prototype={createBodyCallback:function(a,b,c){var d=-1;a.id?d=a.id:a.body&&(d=a.body.id),d>-1&&(null===b?(delete this._bodyCallbacks[d],delete this._bodyCallbackContext[d]):(this._bodyCallbacks[d]=b,this._bodyCallbackContext[d]=c))},createGroupCallback:function(a,b,c){null===b?(delete this._groupCallbacks[a.mask],delete this._groupCallbacksContext[a.mask]):(this._groupCallbacks[a.mask]=b,this._groupCallbackContext[a.mask]=c)},getCollisionMask:function(){var a=0;this._collideWorldBounds&&(a=this.game.physics.p2.boundsCollisionGroup.mask);for(var b=0;b<this.collidesWith.length;b++)a|=this.collidesWith[b].mask;return a},updateCollisionMask:function(a){var b=this.getCollisionMask();if("undefined"==typeof a)for(var c=this.data.shapes.length-1;c>=0;c--)this.data.shapes[c].collisionMask=b;else a.collisionMask=b},setCollisionGroup:function(a,b){var c=this.getCollisionMask();if("undefined"==typeof b)for(var d=this.data.shapes.length-1;d>=0;d--)this.data.shapes[d].collisionGroup=a.mask,this.data.shapes[d].collisionMask=c;else b.collisionGroup=a.mask,b.collisionMask=c},clearCollision:function(a,b,c){if("undefined"==typeof c)for(var d=this.data.shapes.length-1;d>=0;d--)a&&(this.data.shapes[d].collisionGroup=null),b&&(this.data.shapes[d].collisionMask=null);else a&&(c.collisionGroup=null),b&&(c.collisionMask=null);a&&(this.collidesWith.length=0)},collides:function(a,b,c,d){if(Array.isArray(a))for(var e=0;e<a.length;e++)-1===this.collidesWith.indexOf(a[e])&&(this.collidesWith.push(a[e]),b&&this.createGroupCallback(a[e],b,c));else-1===this.collidesWith.indexOf(a)&&(this.collidesWith.push(a),b&&this.createGroupCallback(a,b,c));var f=this.getCollisionMask();if("undefined"==typeof d)for(var e=this.data.shapes.length-1;e>=0;e--)this.data.shapes[e].collisionMask=f;else d.collisionMask=f},adjustCenterOfMass:function(){this.data.adjustCenterOfMass()},applyDamping:function(a){this.data.applyDamping(a)},applyForce:function(a,b,c){this.data.applyForce(a,[this.world.pxmi(b),this.world.pxmi(c)])},setZeroForce:function(){this.data.setZeroForce()},setZeroRotation:function(){this.data.angularVelocity=0},setZeroVelocity:function(){this.data.velocity[0]=0,this.data.velocity[1]=0},setZeroDamping:function(){this.data.damping=0,this.data.angularDamping=0},toLocalFrame:function(a,b){return this.data.toLocalFrame(a,b)},toWorldFrame:function(a,b){return this.data.toWorldFrame(a,b)},rotateLeft:function(a){this.data.angularVelocity=this.world.pxm(-a)},rotateRight:function(a){this.data.angularVelocity=this.world.pxm(a)},moveForward:function(a){var b=this.world.pxmi(-a),c=this.data.angle+Math.PI/2;this.data.velocity[0]=b*Math.cos(c),this.data.velocity[1]=b*Math.sin(c)},moveBackward:function(a){var b=this.world.pxmi(-a),c=this.data.angle+Math.PI/2;this.data.velocity[0]=-(b*Math.cos(c)),this.data.velocity[1]=-(b*Math.sin(c))},thrust:function(a){var b=this.world.pxmi(-a),c=this.data.angle+Math.PI/2;this.data.force[0]+=b*Math.cos(c),this.data.force[1]+=b*Math.sin(c)},reverse:function(a){var b=this.world.pxmi(-a),c=this.data.angle+Math.PI/2;this.data.force[0]-=b*Math.cos(c),this.data.force[1]-=b*Math.sin(c)},moveLeft:function(a){this.data.velocity[0]=this.world.pxmi(-a)},moveRight:function(a){this.data.velocity[0]=this.world.pxmi(a)},moveUp:function(a){this.data.velocity[1]=this.world.pxmi(-a)},moveDown:function(a){this.data.velocity[1]=this.world.pxmi(a)},preUpdate:function(){this.removeNextStep&&(this.removeFromWorld(),this.removeNextStep=!1)},postUpdate:function(){this.sprite.x=this.world.mpxi(this.data.position[0]),this.sprite.y=this.world.mpxi(this.data.position[1]),this.fixedRotation||(this.sprite.rotation=this.data.angle)},reset:function(a,b,c,d){"undefined"==typeof c&&(c=!1),"undefined"==typeof d&&(d=!1),this.setZeroForce(),this.setZeroVelocity(),this.setZeroRotation(),c&&this.setZeroDamping(),d&&(this.mass=1),this.x=a,this.y=b},addToWorld:function(){if(this.game.physics.p2._toRemove)for(var a=0;a<this.game.physics.p2._toRemove.length;a++)this.game.physics.p2._toRemove[a]===this&&this.game.physics.p2._toRemove.splice(a,1);this.data.world!==this.game.physics.p2.world&&this.game.physics.p2.addBody(this)},removeFromWorld:function(){this.data.world===this.game.physics.p2.world&&this.game.physics.p2.removeBodyNextStep(this)},destroy:function(){this.removeFromWorld(),this.clearShapes(),this._bodyCallbacks={},this._bodyCallbackContext={},this._groupCallbacks={},this._groupCallbackContext={},this.debugBody&&this.debugBody.destroy(),this.debugBody=null,this.sprite.body=null,this.sprite=null},clearShapes:function(){for(var a=this.data.shapes.length;a--;)this.data.removeShape(this.data.shapes[a]);this.shapeChanged()},addShape:function(a,b,c,d){return"undefined"==typeof b&&(b=0),"undefined"==typeof c&&(c=0),"undefined"==typeof d&&(d=0),this.data.addShape(a,[this.world.pxmi(b),this.world.pxmi(c)],d),this.shapeChanged(),a},addCircle:function(a,b,c,d){var e=new p2.Circle(this.world.pxm(a));return this.addShape(e,b,c,d)},addRectangle:function(a,b,c,d,e){var f=new p2.Rectangle(this.world.pxm(a),this.world.pxm(b));return this.addShape(f,c,d,e)},addPlane:function(a,b,c){var d=new p2.Plane;return this.addShape(d,a,b,c)},addParticle:function(a,b,c){var d=new p2.Particle;return this.addShape(d,a,b,c)},addLine:function(a,b,c,d){var e=new p2.Line(this.world.pxm(a));return this.addShape(e,b,c,d)},addCapsule:function(a,b,c,d,e){var f=new p2.Capsule(this.world.pxm(a),this.world.pxm(b));return this.addShape(f,c,d,e)},addPolygon:function(a,b){a=a||{},Array.isArray(b)||(b=Array.prototype.slice.call(arguments,1));var c=[];if(1===b.length&&Array.isArray(b[0]))c=b[0].slice(0);else if(Array.isArray(b[0]))c=b.slice();else if("number"==typeof b[0])for(var d=0,e=b.length;e>d;d+=2)c.push([b[d],b[d+1]]);var f=c.length-1;c[f][0]===c[0][0]&&c[f][1]===c[0][1]&&c.pop();for(var g=0;g<c.length;g++)c[g][0]=this.world.pxmi(c[g][0]),c[g][1]=this.world.pxmi(c[g][1]);var h=this.data.fromPolygon(c,a);return this.shapeChanged(),h},removeShape:function(a){var b=this.data.removeShape(a);return this.shapeChanged(),b},setCircle:function(a,b,c,d){return this.clearShapes(),this.addCircle(a,b,c,d)},setRectangle:function(a,b,c,d,e){return"undefined"==typeof a&&(a=16),"undefined"==typeof b&&(b=16),this.clearShapes(),this.addRectangle(a,b,c,d,e)},setRectangleFromSprite:function(a){return"undefined"==typeof a&&(a=this.sprite),this.clearShapes(),this.addRectangle(a.width,a.height,0,0,a.rotation)},setMaterial:function(a,b){if("undefined"==typeof b)for(var c=this.data.shapes.length-1;c>=0;c--)this.data.shapes[c].material=a;else b.material=a},shapeChanged:function(){this.debugBody&&this.debugBody.draw()},addPhaserPolygon:function(a,b){for(var c=this.game.cache.getPhysicsData(a,b),d=[],e=0;e<c.length;e++){var f=c[e],g=this.addFixture(f);d[f.filter.group]=d[f.filter.group]||[],d[f.filter.group]=d[f.filter.group].concat(g),f.fixtureKey&&(d[f.fixtureKey]=g)}return this.data.aabbNeedsUpdate=!0,this.shapeChanged(),d},addFixture:function(a){var b=[];if(a.circle){var c=new p2.Circle(this.world.pxm(a.circle.radius));c.collisionGroup=a.filter.categoryBits,c.collisionMask=a.filter.maskBits,c.sensor=a.isSensor;var d=p2.vec2.create();d[0]=this.world.pxmi(a.circle.position[0]-this.sprite.width/2),d[1]=this.world.pxmi(a.circle.position[1]-this.sprite.height/2),this.data.addShape(c,d),b.push(c)}else for(var e=a.polygons,f=p2.vec2.create(),g=0;g<e.length;g++){for(var h=e[g],i=[],j=0;j<h.length;j+=2)i.push([this.world.pxmi(h[j]),this.world.pxmi(h[j+1])]);for(var c=new p2.Convex(i),k=0;k!==c.vertices.length;k++){var l=c.vertices[k];p2.vec2.sub(l,l,c.centerOfMass)}p2.vec2.scale(f,c.centerOfMass,1),f[0]-=this.world.pxmi(this.sprite.width/2),f[1]-=this.world.pxmi(this.sprite.height/2),c.updateTriangles(),c.updateCenterOfMass(),c.updateBoundingRadius(),c.collisionGroup=a.filter.categoryBits,c.collisionMask=a.filter.maskBits,c.sensor=a.isSensor,this.data.addShape(c,f),b.push(c)}return b},loadPolygon:function(a,b){for(var c=this.game.cache.getPhysicsData(a,b),d=p2.vec2.create(),e=0;e<c.length;e++){for(var f=[],g=0;g<c[e].shape.length;g+=2)f.push([this.world.pxmi(c[e].shape[g]),this.world.pxmi(c[e].shape[g+1])]);for(var h=new p2.Convex(f),i=0;i!==h.vertices.length;i++){var j=h.vertices[i];p2.vec2.sub(j,j,h.centerOfMass)}p2.vec2.scale(d,h.centerOfMass,1),d[0]-=this.world.pxmi(this.sprite.width/2),d[1]-=this.world.pxmi(this.sprite.height/2),h.updateTriangles(),h.updateCenterOfMass(),h.updateBoundingRadius(),this.data.addShape(h,d)}return this.data.aabbNeedsUpdate=!0,this.shapeChanged(),!0}},Phaser.Physics.P2.Body.prototype.constructor=Phaser.Physics.P2.Body,Phaser.Physics.P2.Body.DYNAMIC=1,Phaser.Physics.P2.Body.STATIC=2,Phaser.Physics.P2.Body.KINEMATIC=4,Object.defineProperty(Phaser.Physics.P2.Body.prototype,"static",{get:function(){return this.data.type===Phaser.Physics.P2.Body.STATIC},set:function(a){a&&this.data.type!==Phaser.Physics.P2.Body.STATIC?(this.data.type=Phaser.Physics.P2.Body.STATIC,this.mass=0):a||this.data.type!==Phaser.Physics.P2.Body.STATIC||(this.data.type=Phaser.Physics.P2.Body.DYNAMIC,0===this.mass&&(this.mass=1))}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"dynamic",{get:function(){return this.data.type===Phaser.Physics.P2.Body.DYNAMIC},set:function(a){a&&this.data.type!==Phaser.Physics.P2.Body.DYNAMIC?(this.data.type=Phaser.Physics.P2.Body.DYNAMIC,0===this.mass&&(this.mass=1)):a||this.data.type!==Phaser.Physics.P2.Body.DYNAMIC||(this.data.type=Phaser.Physics.P2.Body.STATIC,this.mass=0)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"kinematic",{get:function(){return this.data.type===Phaser.Physics.P2.Body.KINEMATIC},set:function(a){a&&this.data.type!==Phaser.Physics.P2.Body.KINEMATIC?(this.data.type=Phaser.Physics.P2.Body.KINEMATIC,this.mass=4):a||this.data.type!==Phaser.Physics.P2.Body.KINEMATIC||(this.data.type=Phaser.Physics.P2.Body.STATIC,this.mass=0)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"allowSleep",{get:function(){return this.data.allowSleep},set:function(a){a!==this.data.allowSleep&&(this.data.allowSleep=a)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"angle",{get:function(){return Phaser.Math.wrapAngle(Phaser.Math.radToDeg(this.data.angle))},set:function(a){this.data.angle=Phaser.Math.degToRad(Phaser.Math.wrapAngle(a))}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"angularDamping",{get:function(){return this.data.angularDamping},set:function(a){this.data.angularDamping=a}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"angularForce",{get:function(){return this.data.angularForce},set:function(a){this.data.angularForce=a}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"angularVelocity",{get:function(){return this.data.angularVelocity},set:function(a){this.data.angularVelocity=a}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"damping",{get:function(){return this.data.damping},set:function(a){this.data.damping=a}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"fixedRotation",{get:function(){return this.data.fixedRotation},set:function(a){a!==this.data.fixedRotation&&(this.data.fixedRotation=a)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"inertia",{get:function(){return this.data.inertia},set:function(a){this.data.inertia=a}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"mass",{get:function(){return this.data.mass},set:function(a){a!==this.data.mass&&(this.data.mass=a,this.data.updateMassProperties())}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"motionState",{get:function(){return this.data.type},set:function(a){a!==this.data.type&&(this.data.type=a)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"rotation",{get:function(){return this.data.angle},set:function(a){this.data.angle=a}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"sleepSpeedLimit",{get:function(){return this.data.sleepSpeedLimit},set:function(a){this.data.sleepSpeedLimit=a}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"x",{get:function(){return this.world.mpxi(this.data.position[0])},set:function(a){this.data.position[0]=this.world.pxmi(a)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"y",{get:function(){return this.world.mpxi(this.data.position[1])},set:function(a){this.data.position[1]=this.world.pxmi(a)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"id",{get:function(){return this.data.id}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"debug",{get:function(){return null!==this.debugBody},set:function(a){a&&!this.debugBody?this.debugBody=new Phaser.Physics.P2.BodyDebug(this.game,this.data):!a&&this.debugBody&&(this.debugBody.destroy(),this.debugBody=null)}}),Object.defineProperty(Phaser.Physics.P2.Body.prototype,"collideWorldBounds",{get:function(){return this._collideWorldBounds},set:function(a){a&&!this._collideWorldBounds?(this._collideWorldBounds=!0,this.updateCollisionMask()):!a&&this._collideWorldBounds&&(this._collideWorldBounds=!1,this.updateCollisionMask())}}),Phaser.Physics.P2.BodyDebug=function(a,b,c){Phaser.Group.call(this,a);var d={pixelsPerLengthUnit:20,debugPolygons:!1,lineWidth:1,alpha:.5};this.settings=Phaser.Utils.extend(d,c),this.ppu=this.settings.pixelsPerLengthUnit,this.ppu=-1*this.ppu,this.body=b,this.canvas=new Phaser.Graphics(a),this.canvas.alpha=this.settings.alpha,this.add(this.canvas),this.draw()},Phaser.Physics.P2.BodyDebug.prototype=Object.create(Phaser.Group.prototype),Phaser.Physics.P2.BodyDebug.prototype.constructor=Phaser.Physics.P2.BodyDebug,Phaser.Utils.extend(Phaser.Physics.P2.BodyDebug.prototype,{update:function(){this.updateSpriteTransform()},updateSpriteTransform:function(){return this.position.x=this.body.position[0]*this.ppu,this.position.y=this.body.position[1]*this.ppu,this.rotation=this.body.angle},draw:function(){var a,b,c,d,e,f,g,h,i,j,k,l,m,n,o;if(h=this.body,j=this.canvas,j.clear(),c=parseInt(this.randomPastelHex(),16),f=16711680,g=this.lineWidth,h instanceof p2.Body&&h.shapes.length){var p=h.shapes.length;for(d=0;d!==p;){if(b=h.shapes[d],i=h.shapeOffsets[d],a=h.shapeAngles[d],i=i||0,a=a||0,b instanceof p2.Circle)this.drawCircle(j,i[0]*this.ppu,i[1]*this.ppu,a,b.radius*this.ppu,c,g);else if(b instanceof p2.Convex){for(l=[],m=p2.vec2.create(),e=n=0,o=b.vertices.length;o>=0?o>n:n>o;e=o>=0?++n:--n)k=b.vertices[e],p2.vec2.rotate(m,k,a),l.push([(m[0]+i[0])*this.ppu,-(m[1]+i[1])*this.ppu]);this.drawConvex(j,l,b.triangles,f,c,g,this.settings.debugPolygons,[i[0]*this.ppu,-i[1]*this.ppu])}else b instanceof p2.Plane?this.drawPlane(j,i[0]*this.ppu,-i[1]*this.ppu,c,f,5*g,10*g,10*g,100*this.ppu,a):b instanceof p2.Line?this.drawLine(j,b.length*this.ppu,f,g):b instanceof p2.Rectangle&&this.drawRectangle(j,i[0]*this.ppu,-i[1]*this.ppu,a,b.width*this.ppu,b.height*this.ppu,f,c,g);d++}}},drawRectangle:function(a,b,c,d,e,f,g,h,i){"undefined"==typeof i&&(i=1),"undefined"==typeof g&&(g=0),a.lineStyle(i,g,1),a.beginFill(h),a.drawRect(b-e/2,c-f/2,e,f)},drawCircle:function(a,b,c,d,e,f,g){"undefined"==typeof g&&(g=1),"undefined"==typeof f&&(f=16777215),a.lineStyle(g,0,1),a.beginFill(f,1),a.drawCircle(b,c,-e),a.endFill(),a.moveTo(b,c),a.lineTo(b+e*Math.cos(-d),c+e*Math.sin(-d))},drawLine:function(a,b,c,d){"undefined"==typeof d&&(d=1),"undefined"==typeof c&&(c=0),a.lineStyle(5*d,c,1),a.moveTo(-b/2,0),a.lineTo(b/2,0)},drawConvex:function(a,b,c,d,e,f,g,h){var i,j,k,l,m,n,o,p,q,r,s;if("undefined"==typeof f&&(f=1),"undefined"==typeof d&&(d=0),g){for(i=[16711680,65280,255],j=0;j!==b.length+1;)l=b[j%b.length],m=b[(j+1)%b.length],o=l[0],r=l[1],p=m[0],s=m[1],a.lineStyle(f,i[j%i.length],1),a.moveTo(o,-r),a.lineTo(p,-s),a.drawCircle(o,-r,2*f),j++;return a.lineStyle(f,0,1),a.drawCircle(h[0],h[1],2*f)}for(a.lineStyle(f,d,1),a.beginFill(e),j=0;j!==b.length;)k=b[j],n=k[0],q=k[1],0===j?a.moveTo(n,-q):a.lineTo(n,-q),j++;return a.endFill(),b.length>2?(a.moveTo(b[b.length-1][0],-b[b.length-1][1]),a.lineTo(b[0][0],-b[0][1])):void 0},drawPath:function(a,b,c,d,e){var f,g,h,i,j,k,l,m,n,o,p,q,r;for("undefined"==typeof e&&(e=1),"undefined"==typeof c&&(c=0),a.lineStyle(e,c,1),"number"==typeof d&&a.beginFill(d),h=null,i=null,g=0;g<b.length;)p=b[g],q=p[0],r=p[1],(q!==h||r!==i)&&(0===g?a.moveTo(q,r):(j=h,k=i,l=q,m=r,n=b[(g+1)%b.length][0],o=b[(g+1)%b.length][1],f=(l-j)*(o-k)-(n-j)*(m-k),0!==f&&a.lineTo(q,r)),h=q,i=r),g++;"number"==typeof d&&a.endFill(),b.length>2&&"number"==typeof d&&(a.moveTo(b[b.length-1][0],b[b.length-1][1]),a.lineTo(b[0][0],b[0][1]))},drawPlane:function(a,b,c,d,e,f,g,h,i,j){var k,l,m;"undefined"==typeof f&&(f=1),"undefined"==typeof d&&(d=16777215),a.lineStyle(f,e,11),a.beginFill(d),k=i,a.moveTo(b,-c),l=b+Math.cos(j)*this.game.width,m=c+Math.sin(j)*this.game.height,a.lineTo(l,-m),a.moveTo(b,-c),l=b+Math.cos(j)*-this.game.width,m=c+Math.sin(j)*-this.game.height,a.lineTo(l,-m)},randomPastelHex:function(){var a,b,c,d;return c=[255,255,255],d=Math.floor(256*Math.random()),b=Math.floor(256*Math.random()),a=Math.floor(256*Math.random()),d=Math.floor((d+3*c[0])/4),b=Math.floor((b+3*c[1])/4),a=Math.floor((a+3*c[2])/4),this.rgbToHex(d,b,a)},rgbToHex:function(a,b,c){return this.componentToHex(a)+this.componentToHex(b)+this.componentToHex(c)},componentToHex:function(a){var b;return b=a.toString(16),2===b.len?b:b+"0"}}),Phaser.Physics.P2.Spring=function(a,b,c,d,e,f,g,h,i,j){this.game=a.game,this.world=a,"undefined"==typeof d&&(d=1),"undefined"==typeof e&&(e=100),"undefined"==typeof f&&(f=1),d=a.pxm(d);var k={restLength:d,stiffness:e,damping:f};"undefined"!=typeof g&&null!==g&&(k.worldAnchorA=[a.pxm(g[0]),a.pxm(g[1])]),"undefined"!=typeof h&&null!==h&&(k.worldAnchorB=[a.pxm(h[0]),a.pxm(h[1])]),"undefined"!=typeof i&&null!==i&&(k.localAnchorA=[a.pxm(i[0]),a.pxm(i[1])]),"undefined"!=typeof j&&null!==j&&(k.localAnchorB=[a.pxm(j[0]),a.pxm(j[1])]),this.data=new p2.LinearSpring(b,c,k),this.data.parent=this},Phaser.Physics.P2.Spring.prototype.constructor=Phaser.Physics.P2.Spring,Phaser.Physics.P2.RotationalSpring=function(a,b,c,d,e,f){this.game=a.game,this.world=a,"undefined"==typeof d&&(d=null),"undefined"==typeof e&&(e=100),"undefined"==typeof f&&(f=1),d&&(d=a.pxm(d));var g={restAngle:d,stiffness:e,damping:f};this.data=new p2.RotationalSpring(b,c,g),this.data.parent=this},Phaser.Physics.P2.Spring.prototype.constructor=Phaser.Physics.P2.Spring,Phaser.Physics.P2.Material=function(a){this.name=a,p2.Material.call(this)},Phaser.Physics.P2.Material.prototype=Object.create(p2.Material.prototype),Phaser.Physics.P2.Material.prototype.constructor=Phaser.Physics.P2.Material,Phaser.Physics.P2.ContactMaterial=function(a,b,c){p2.ContactMaterial.call(this,a,b,c)},Phaser.Physics.P2.ContactMaterial.prototype=Object.create(p2.ContactMaterial.prototype),Phaser.Physics.P2.ContactMaterial.prototype.constructor=Phaser.Physics.P2.ContactMaterial,Phaser.Physics.P2.CollisionGroup=function(a){this.mask=a},Phaser.Physics.P2.DistanceConstraint=function(a,b,c,d,e,f,g){"undefined"==typeof d&&(d=100),"undefined"==typeof e&&(e=[0,0]),"undefined"==typeof f&&(f=[0,0]),"undefined"==typeof g&&(g=Number.MAX_VALUE),this.game=a.game,this.world=a,d=a.pxm(d),e=[a.pxmi(e[0]),a.pxmi(e[1])],f=[a.pxmi(f[0]),a.pxmi(f[1])];var h={distance:d,localAnchorA:e,localAnchorB:f,maxForce:g};p2.DistanceConstraint.call(this,b,c,h)},Phaser.Physics.P2.DistanceConstraint.prototype=Object.create(p2.DistanceConstraint.prototype),Phaser.Physics.P2.DistanceConstraint.prototype.constructor=Phaser.Physics.P2.DistanceConstraint,Phaser.Physics.P2.GearConstraint=function(a,b,c,d,e){"undefined"==typeof d&&(d=0),"undefined"==typeof e&&(e=1),this.game=a.game,this.world=a;var f={angle:d,ratio:e};p2.GearConstraint.call(this,b,c,f)},Phaser.Physics.P2.GearConstraint.prototype=Object.create(p2.GearConstraint.prototype),Phaser.Physics.P2.GearConstraint.prototype.constructor=Phaser.Physics.P2.GearConstraint,Phaser.Physics.P2.LockConstraint=function(a,b,c,d,e,f){"undefined"==typeof d&&(d=[0,0]),"undefined"==typeof e&&(e=0),"undefined"==typeof f&&(f=Number.MAX_VALUE),this.game=a.game,this.world=a,d=[a.pxm(d[0]),a.pxm(d[1])];var g={localOffsetB:d,localAngleB:e,maxForce:f};p2.LockConstraint.call(this,b,c,g)},Phaser.Physics.P2.LockConstraint.prototype=Object.create(p2.LockConstraint.prototype),Phaser.Physics.P2.LockConstraint.prototype.constructor=Phaser.Physics.P2.LockConstraint,Phaser.Physics.P2.PrismaticConstraint=function(a,b,c,d,e,f,g,h){"undefined"==typeof d&&(d=!0),"undefined"==typeof e&&(e=[0,0]),"undefined"==typeof f&&(f=[0,0]),"undefined"==typeof g&&(g=[0,0]),"undefined"==typeof h&&(h=Number.MAX_VALUE),this.game=a.game,this.world=a,e=[a.pxmi(e[0]),a.pxmi(e[1])],f=[a.pxmi(f[0]),a.pxmi(f[1])];var i={localAnchorA:e,localAnchorB:f,localAxisA:g,maxForce:h,disableRotationalLock:!d};p2.PrismaticConstraint.call(this,b,c,i)},Phaser.Physics.P2.PrismaticConstraint.prototype=Object.create(p2.PrismaticConstraint.prototype),Phaser.Physics.P2.PrismaticConstraint.prototype.constructor=Phaser.Physics.P2.PrismaticConstraint,Phaser.Physics.P2.RevoluteConstraint=function(a,b,c,d,e,f,g){"undefined"==typeof f&&(f=Number.MAX_VALUE),"undefined"==typeof g&&(g=null),this.game=a.game,this.world=a,c=[a.pxmi(c[0]),a.pxmi(c[1])],e=[a.pxmi(e[0]),a.pxmi(e[1])],g&&(g=[a.pxmi(g[0]),a.pxmi(g[1])]);var h={worldPivot:g,localPivotA:c,localPivotB:e,maxForce:f};p2.RevoluteConstraint.call(this,b,d,h)},Phaser.Physics.P2.RevoluteConstraint.prototype=Object.create(p2.RevoluteConstraint.prototype),Phaser.Physics.P2.RevoluteConstraint.prototype.constructor=Phaser.Physics.P2.RevoluteConstraint;
 //# sourceMappingURL=phaser.map
 var Area = function(x,y,width, height, elevation) {
+  this.elevation = elevation;
   this.position = new Phaser.Point(x,y);
   this.width = width;
   this.height = height;
@@ -36,7 +37,7 @@ Area.prototype.draw = function() {
   game.graphics.drawRect(this.position.x, this.position.y, this.width, this.height);
   game.graphics.endFill();
 }
-var Guard = function(x,y,elevation,title,points) {
+var Guard = function(x,y,elevation,title,points,direction) {
   this.position = new Phaser.Point(x,y);
   this.elevation = elevation;
   this.title = title;
@@ -44,10 +45,11 @@ var Guard = function(x,y,elevation,title,points) {
   this.speed = 2;
   this.patrolIndex = 0;
   this.points = [];
-  this.direction = 0;
+  this.direction = direction;
   this.timeline = new Timeline(this);
   this.setUpPatrol(points);
   this.startPatrolTween();
+  console.log(this.direction);
 }
 
 Guard.prototype.setAttributesByTitle = function(title) {
@@ -59,7 +61,13 @@ Guard.prototype.setAttributesByTitle = function(title) {
 
 Guard.prototype.pause = function(time) {
   this.tween.pause();
-  game.time.events.add(Phaser.Timer.SECOND * time, this.tween.resume, this.tween);
+  this.direction = 270;
+  game.time.events.add(Phaser.Timer.SECOND * time, this.unPause, this);
+}
+
+Guard.prototype.unPause = function() {
+  this.tween.resume();
+  this.direction = Phaser.Math.radToDeg(Phaser.Point.angle(this.position,this.points[this.patrolIndex]));
 }
 
 Guard.prototype.startPatrolTween = function() {
@@ -67,14 +75,16 @@ Guard.prototype.startPatrolTween = function() {
     this.timelineIndex = 0;
     this.timeline.eventsIndex = 0;
   }
-  this.tween=game.add.tween(this.position);
-  this.patrolIndex = (this.patrolIndex + 1) % this.points.length;
-  var distance = this.position.distance(this.points[this.patrolIndex])
+  if (this.points.length > 1) {
+    this.tween=game.add.tween(this.position);
+    this.patrolIndex = (this.patrolIndex + 1) % this.points.length;
+    var distance = this.position.distance(this.points[this.patrolIndex])
 
-  this.tween.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
-  this.direction = Phaser.Math.radToDeg(Phaser.Point.angle(this.position,this.points[this.patrolIndex]));
-  console.log(this.direction);
-  this.tween.onComplete.add(this.startPatrolTween, this);
+    this.tween.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+    this.direction = Phaser.Math.radToDeg(Phaser.Point.angle(this.position,this.points[this.patrolIndex]));
+    console.log(this.direction);
+    this.tween.onComplete.add(this.startPatrolTween, this);
+  }
   //p.start();
 
 }
@@ -90,6 +100,17 @@ Guard.prototype.draw = function() {
   game.graphics.beginFill(this.color);
   game.graphics.drawCircle(this.position.x,this.position.y,5);
   game.graphics.endFill();
+}
+
+Guard.prototype.drawLOS = function() {
+  var point1 = findPointFromAngle(this.position, 40, this.direction - 30);
+  var point2 = findPointFromAngle(this.position, 40, this.direction + 30);
+  game.graphics.lineStyle(1,0x99CCFF);
+  game.graphics.moveTo(this.position.x, this.position.y);
+  game.graphics.lineTo(point1.x, point1.y);
+  game.graphics.moveTo(this.position.x, this.position.y);
+  game.graphics.lineTo(point2.x, point2.y);
+  game.graphics.lineStyle();
 }
 var Level = function() {
   this.areas = LEVEL_TEMPLATE[0][0];
@@ -108,6 +129,24 @@ Level.prototype.assignEvents = function() {
   eventArray = LEVEL_TEMPLATE[0][2];
   for(var i = 0; i < eventArray.length; i++) {
     this.guards[eventArray[i].guardIndex].timeline.events.push({ timelineIndex: eventArray[i].timelineIndex, action: eventArray[i].action, duration: eventArray[i].duration })
+  }
+}
+
+Level.prototype.draw = function() {
+  //levels
+  for(var l = 0; l < 4; l++) {
+    //areas
+    for(var i = 0; i < level.areas.length; i++) {
+      if(l == level.areas[i].elevation) level.areas[i].draw();
+    }
+    //guards LOS
+    for(var i = 0; i < level.guards.length; i++) {
+      if(l == level.guards[i].elevation) level.guards[i].drawLOS();
+    }
+    //guards
+    for(var i = 0; i < level.guards.length; i++) {
+      if(l == level.guards[i].elevation) level.guards[i].draw();
+    }
   }
 }
 
@@ -153,11 +192,11 @@ function setUpLevels() {
         new Area(0, 380, WIDTH * 0.2, 40, 1),
         new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
       ],
-      //guards(x,y,elevation,title,patrolPoints)
+      //guards(x,y,elevation,title,patrolPoints,direction)
       [
-        new Guard(100,265,0,"basic",[[100,265],[280,265],[280,440],[100,440]]),
-        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]]),
-        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]])
+        new Guard(100,265,0,"basic",[[100,265],[280,265],[280,440],[100,440]],0),
+        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]],270),
+        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]],270)
       ],
       //events
       [
@@ -185,13 +224,10 @@ function clickEvent() {
 }
 
 function findPointFromAngle(startingPoint, distance, angle) {
-  if(angle == 180) angle = 0;
-  else if(angle == 0) angle = 180;
-  else if(angle == -90) angle = 270;
-  console.log("angle = " + angle);
+  angle = 180 - angle;
   new_x = startingPoint.x + Math.cos(Phaser.Math.degToRad(angle)) * distance;
   new_y = startingPoint.y - Math.sin(Phaser.Math.degToRad(angle)) * distance;
-  return [new_x, new_y];
+  return { x: new_x, y: new_y };
 }
 /**
  *
@@ -244,13 +280,7 @@ var state = {
     render: function() {
       game.graphics.clear();
       //areas
-      for(var i = 0; i < level.areas.length; i++) {
-        level.areas[i].draw();
-      }
-      //guards
-      for(var i = 0; i < level.guards.length; i++) {
-        level.guards[i].draw();
-      }
+      level.draw();
     }
 };
 

@@ -49,13 +49,7 @@ var state = {
     render: function() {
       game.graphics.clear();
       //areas
-      for(var i = 0; i < level.areas.length; i++) {
-        level.areas[i].draw();
-      }
-      //guards
-      for(var i = 0; i < level.guards.length; i++) {
-        level.guards[i].draw();
-      }
+      level.draw();
     }
 };
 
