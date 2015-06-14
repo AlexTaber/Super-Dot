@@ -36,6 +36,72 @@ Area.prototype.draw = function() {
   game.graphics.drawRect(this.position.x, this.position.y, this.width, this.height);
   game.graphics.endFill();
 }
+var Guard = function(x,y,elevation,title,action,points) {
+  this.position = new Phaser.Point(x,y);
+  this.elevation = elevation;
+  this.title = title;
+  this.setAttributesByTitle(title);
+  this.action = action;
+  this.speed = 2;
+  this.patrolIndex = 0;
+  this.points = [];
+  this.setUpPatrol(points);
+  this.startPatrolTween();
+}
+
+Guard.prototype.setAttributesByTitle = function(title) {
+  if(title == "basic") {
+    this.canSeeUp = false;
+    this.color = 0xFF0000;
+  }
+}
+
+Guard.prototype.patrol = function(points) {
+  // if(this.tween.isRunning == false) {
+  //   this.patrolIndex = (this.patrolIndex + 1) % this.points.length;
+  //   console.log(this.patrolIndex)
+  //   this.tween.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, 2000, Phaser.Easing.Linear.None, true);
+  // }
+}
+
+Guard.prototype.startPatrolTween = function() {
+
+  var p=game.add.tween(this.position);
+  this.patrolIndex = (this.patrolIndex + 1) % this.points.length;
+  var distance = this.position.distance(this.points[this.patrolIndex])
+
+  p.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+  p.onComplete.add(this.startPatrolTween, this);
+  //p.start();
+
+}
+
+Guard.prototype.setUpPatrol = function(points) {
+  for(var i = 0; i < points.length; i++) {
+    var newPoint = new Phaser.Point(points[i][0], points[i][1]);
+    this.points.push(newPoint);
+  }
+}
+
+Guard.prototype.draw = function() {
+  game.graphics.beginFill(this.color);
+  game.graphics.drawCircle(this.position.x,this.position.y,5);
+  game.graphics.endFill();
+}
+var Level = function() {
+  this.areas = LEVEL_TEMPLATE[0][0];
+  this.guards = LEVEL_TEMPLATE[0][1];
+}
+
+Level.prototype.update = function() {
+  this.guardAction();
+}
+
+Level.prototype.guardAction = function() {
+  for(var i = 0; i < this.guards.length; i++) {
+    this.guards[i].action();
+  }
+}
 WIDTH = 320;
 HEIGHT = 480;
 
@@ -46,13 +112,30 @@ AREA_COLORS = [
   0x000000
 ]
 
-LEVEL_TEMPLATE = [
-  [new Area(0,0,WIDTH,100,2),
-  new Area(0,100,WIDTH * 0.4,50,1),
-  new Area(WIDTH * 0.6,100,WIDTH * 0.4,50,1),
-  new Area(WIDTH * 0.4,100,WIDTH * 0.2,50,3)
+function setUpLevels() {
+  LEVEL_TEMPLATE = [
+    //level 0
+    [
+      //areas
+      [
+        new Area(0,0,WIDTH,100,3),
+        new Area(WIDTH * 0.2,100,WIDTH * 0.4,50,1),
+        new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
+        new Area(WIDTH * 0.4,100,WIDTH * 0.2,50,3),
+        new Area(0,100, WIDTH * 0.2, 50, 2),
+        new Area(WIDTH * 0.8,100, WIDTH * 0.2, 50, 2),
+        new Area(0, 300, WIDTH * 0.2, 40, 3),
+        new Area(0, 340, WIDTH * 0.2, 40, 2),
+        new Area(0, 380, WIDTH * 0.2, 40, 1),
+        new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
+      ],
+      //guards
+      [
+        new Guard(50,50,1,"basic", Guard.prototype.patrol,[[50,50],[300,50],[300,190]])
+      ]
+    ]
   ]
-]
+}
 
 
 function clickEvent() {
@@ -69,9 +152,6 @@ function clickEvent() {
     }
     return false;
   }
-}
-var Level = function() {
-  this.areas = LEVEL_TEMPLATE[0];
 }
 /**
  *
@@ -97,6 +177,7 @@ var state = {
     },
     preload: function() {
         // STate preload logic goes here
+        setUpLevels();
     },
     create: function(){
       // State create logic goes here
@@ -110,23 +191,31 @@ var state = {
       if (clickEvent()){
         click();
       }
+
+      level.update();
     },
 
     render: function() {
-        game.graphics.clear();
-        for(var i = 0; i < level.areas.length; i++) {
-            level.areas[i].draw();
-        }
+      game.graphics.clear();
+      //areas
+      for(var i = 0; i < level.areas.length; i++) {
+        level.areas[i].draw();
+      }
+      //guards
+      for(var i = 0; i < level.guards.length; i++) {
+        level.guards[i].draw();
+      }
     }
 };
 
 var game = new Phaser.Game(
-    WIDTH,
-    HEIGHT,
+    320,
+    480,
     Phaser.AUTO,
     'game',
     state
 );
 
 function click() {
+
 }

@@ -22,6 +22,7 @@ var state = {
     },
     preload: function() {
         // STate preload logic goes here
+        setUpLevels();
     },
     create: function(){
       // State create logic goes here
@@ -35,23 +36,31 @@ var state = {
       if (clickEvent()){
         click();
       }
+
+      level.update();
     },
 
     render: function() {
-        game.graphics.clear();
-        for(var i = 0; i < level.areas.length; i++) {
-            level.areas[i].draw();
-        }
+      game.graphics.clear();
+      //areas
+      for(var i = 0; i < level.areas.length; i++) {
+        level.areas[i].draw();
+      }
+      //guards
+      for(var i = 0; i < level.guards.length; i++) {
+        level.guards[i].draw();
+      }
     }
 };
 
 var game = new Phaser.Game(
-    WIDTH,
-    HEIGHT,
+    320,
+    480,
     Phaser.AUTO,
     'game',
     state
 );
 
 function click() {
+
 }
