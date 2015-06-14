@@ -6,9 +6,9 @@ var Timeline = function(guard) {
 
 Timeline.prototype.checkForEvent = function() {
   if(this.eventsIndex < this.events.length) {
-    if(this.events[this.eventsIndex].timelineIndex == game.timelineIndex) {
+    if(this.events[this.eventsIndex].timelineIndex == this.guard.timelineIndex) {
       var myEvent = this.events[this.eventsIndex].action.bind(this.guard);
-      myEvent();
+      myEvent(this.events[this.eventsIndex].duration);
       this.eventsIndex += 1;
     }
   }

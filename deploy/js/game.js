@@ -44,9 +44,10 @@ var Guard = function(x,y,elevation,title,points) {
   this.speed = 2;
   this.patrolIndex = 0;
   this.points = [];
+  this.timeline = new Timeline(this);
   this.setUpPatrol(points);
   this.startPatrolTween();
-  this.timeline = new Timeline(this);
+  this.direction = 0;
 }
 
 Guard.prototype.setAttributesByTitle = function(title) {
@@ -56,19 +57,23 @@ Guard.prototype.setAttributesByTitle = function(title) {
   }
 }
 
-Guard.prototype.pause = function() {
-  console.log(this);
+Guard.prototype.pause = function(time) {
   this.tween.pause();
-  game.time.events.add(Phaser.Timer.SECOND * 5, this.tween.resume, this.tween);
+  game.time.events.add(Phaser.Timer.SECOND * time, this.tween.resume, this.tween);
 }
 
 Guard.prototype.startPatrolTween = function() {
-
+  if(this.patrolIndex == 0) {
+    this.timelineIndex = 0;
+    this.timeline.eventsIndex = 0;
+  }
   this.tween=game.add.tween(this.position);
   this.patrolIndex = (this.patrolIndex + 1) % this.points.length;
   var distance = this.position.distance(this.points[this.patrolIndex])
 
   this.tween.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+  this.direction = Phaser.Math.radToDeg(Phaser.Point.angle(this.position,this.points[this.patrolIndex]));
+  console.log(this.direction);
   this.tween.onComplete.add(this.startPatrolTween, this);
   //p.start();
 
@@ -94,6 +99,7 @@ var Level = function() {
 
 Level.prototype.update = function() {
   for(var i = 0; i < this.guards.length; i++) {
+    this.guards[i].timelineIndex += 1;
     this.guards[i].timeline.checkForEvent();
   }
 }
@@ -101,7 +107,7 @@ Level.prototype.update = function() {
 Level.prototype.assignEvents = function() {
   eventArray = LEVEL_TEMPLATE[0][2];
   for(var i = 0; i < eventArray.length; i++) {
-    this.guards[eventArray[i].guardIndex].timeline.events.push({ timelineIndex: eventArray[i].timelineIndex, action: eventArray[i].action })
+    this.guards[eventArray[i].guardIndex].timeline.events.push({ timelineIndex: eventArray[i].timelineIndex, action: eventArray[i].action, duration: eventArray[i].duration })
   }
 }
 
@@ -113,9 +119,9 @@ var Timeline = function(guard) {
 
 Timeline.prototype.checkForEvent = function() {
   if(this.eventsIndex < this.events.length) {
-    if(this.events[this.eventsIndex].timelineIndex == game.timelineIndex) {
+    if(this.events[this.eventsIndex].timelineIndex == this.guard.timelineIndex) {
       var myEvent = this.events[this.eventsIndex].action.bind(this.guard);
-      myEvent();
+      myEvent(this.events[this.eventsIndex].duration);
       this.eventsIndex += 1;
     }
   }
@@ -149,13 +155,13 @@ function setUpLevels() {
       ],
       //guards(x,y,elevation,title,patrolPoints)
       [
-        new Guard(100,245,0,"basic",[[100,245],[280,245],[280,440],[100,440]]),
+        new Guard(100,265,0,"basic",[[100,265],[280,265],[280,440],[100,440]]),
         new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]]),
         new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]])
       ],
       //events
       [
-        { guardIndex: 0, action: Guard.prototype.pause, timelineIndex: 100 }
+        { guardIndex: 0, action: Guard.prototype.pause, timelineIndex: 1, duration: 2 }
       ]
     ]
   ]
