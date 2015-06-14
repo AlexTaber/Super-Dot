@@ -1,3 +1,3 @@
 var Level = function() {
-  this.areas = levelTemplate[0];
+  this.areas = LEVEL_TEMPLATE[0];
 }

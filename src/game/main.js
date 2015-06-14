@@ -17,6 +17,7 @@ var state = {
         // t.anchor.setTo(0.5, 0.5);
         game.stage.backgroundColor = '#fff';
         game.graphics = game.add.graphics(0,0);
+        game.clicked = false;
 
     },
     preload: function() {
@@ -26,23 +27,31 @@ var state = {
       // State create logic goes here
       game.areas = [];
       game.areas.push(new Area(50,100,AREA_COLORS[1]));
+
+      level = new Level();
     },
     update: function() {
-        // State Update Logic goes here.
+      //click event
+      if (clickEvent()){
+        click();
+      }
     },
 
     render: function() {
         game.graphics.clear();
-        for(var i = 0; i < game.areas.length; i++) {
-            game.areas[i].draw();
+        for(var i = 0; i < level.areas.length; i++) {
+            level.areas[i].draw();
         }
     }
 };
 
 var game = new Phaser.Game(
-    300,
-    480,
+    WIDTH,
+    HEIGHT,
     Phaser.AUTO,
     'game',
     state
 );
+
+function click() {
+}

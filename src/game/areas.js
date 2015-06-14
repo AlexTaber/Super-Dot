@@ -1,6 +1,7 @@
-var Area = function(width, height, color) {
-  this.position = new Phaser.Point(0,0);
+var Area = function(x,y,width, height, elevation) {
+  this.position = new Phaser.Point(x,y);
   this.width = width;
   this.height = height;
-  this.color = color;
+  this.color = AREA_COLORS[elevation];
 }
+
