@@ -1,4 +1,6 @@
 var Guard = function(x,y,elevation,title,points,direction) {
+  this.startX = x;
+  this.startY = y;
   this.position = new Phaser.Point(x,y);
   this.elevation = elevation;
   this.title = title;
@@ -6,11 +8,11 @@ var Guard = function(x,y,elevation,title,points,direction) {
   this.speed = 2;
   this.patrolIndex = 0;
   this.points = [];
+  this.startDirection = direction;
   this.direction = direction;
   this.timeline = new Timeline(this);
   this.setUpPatrol(points);
-  this.startPatrolTween();
-  console.log(this.direction);
+  //this.startPatrolTween();
 }
 
 Guard.prototype.setAttributesByTitle = function(title) {
@@ -18,6 +20,16 @@ Guard.prototype.setAttributesByTitle = function(title) {
     this.canSeeUp = false;
     this.color = 0xFF0000;
   }
+}
+
+Guard.prototype.canSeePlayer = function() {
+  if(this.position.distance(level.player.position) < 300){
+    var angle = Phaser.Math.radToDeg(level.player.position.angle(this.position));
+    if(angle > this.direction - 30 && angle < this.direction + 30) {
+      return true;
+    }
+  }
+  return false;
 }
 
 Guard.prototype.pause = function(time) {
@@ -55,4 +67,13 @@ Guard.prototype.setUpPatrol = function(points) {
     var newPoint = new Phaser.Point(points[i][0], points[i][1]);
     this.points.push(newPoint);
   }
+}
+
+Guard.prototype.resetGuard = function() {
+  this.position.x = this.startX;
+  this.position.y = this.startY;
+  this.patrolIndex = 0;
+  this.direction = this.startDirection;
+  if(this.tween) this.tween.stop();
+  this.timeline.resetTimeline();
 }

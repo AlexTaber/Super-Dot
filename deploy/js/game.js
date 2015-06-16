@@ -31,6 +31,15 @@ var Area = function(x,y,width, height, elevation) {
   this.color = AREA_COLORS[elevation];
 }
 
+Area.prototype.clicked = function() {
+  var pos = game.input.activePointer.position;
+  if(pos.x > this.position.x && pos.x < this.position.x + this.width){
+    if(pos.y > this.position.y && pos.y < this.position.y + this.height){
+      return true;
+    }
+  }
+  return false;
+}
 
 Area.prototype.draw = function() {
   game.graphics.beginFill(this.color);
@@ -38,6 +47,8 @@ Area.prototype.draw = function() {
   game.graphics.endFill();
 }
 var Guard = function(x,y,elevation,title,points,direction) {
+  this.startX = x;
+  this.startY = y;
   this.position = new Phaser.Point(x,y);
   this.elevation = elevation;
   this.title = title;
@@ -45,11 +56,11 @@ var Guard = function(x,y,elevation,title,points,direction) {
   this.speed = 2;
   this.patrolIndex = 0;
   this.points = [];
+  this.startDirection = direction;
   this.direction = direction;
   this.timeline = new Timeline(this);
   this.setUpPatrol(points);
-  this.startPatrolTween();
-  console.log(this.direction);
+  //this.startPatrolTween();
 }
 
 Guard.prototype.setAttributesByTitle = function(title) {
@@ -57,6 +68,16 @@ Guard.prototype.setAttributesByTitle = function(title) {
     this.canSeeUp = false;
     this.color = 0xFF0000;
   }
+}
+
+Guard.prototype.canSeePlayer = function() {
+  if(this.position.distance(level.player.position) < 300){
+    var angle = Phaser.Math.radToDeg(level.player.position.angle(this.position));
+    if(angle > this.direction - 30 && angle < this.direction + 30) {
+      return true;
+    }
+  }
+  return false;
 }
 
 Guard.prototype.pause = function(time) {
@@ -96,6 +117,14 @@ Guard.prototype.setUpPatrol = function(points) {
   }
 }
 
+Guard.prototype.resetGuard = function() {
+  this.position.x = this.startX;
+  this.position.y = this.startY;
+  this.patrolIndex = 0;
+  this.direction = this.startDirection;
+  if(this.tween) this.tween.stop();
+  this.timeline.resetTimeline();
+}
 Guard.prototype.draw = function() {
   game.graphics.beginFill(this.color);
   game.graphics.drawCircle(this.position.x,this.position.y,5);
@@ -115,13 +144,32 @@ Guard.prototype.drawLOS = function() {
 var Level = function() {
   this.areas = LEVEL_TEMPLATE[0][0];
   this.guards = LEVEL_TEMPLATE[0][1];
+  this.player = LEVEL_TEMPLATE[0][3];
   this.assignEvents();
 }
 
-Level.prototype.update = function() {
+Level.prototype.startLevel = function() {
   for(var i = 0; i < this.guards.length; i++) {
-    this.guards[i].timelineIndex += 1;
-    this.guards[i].timeline.checkForEvent();
+    this.guards[i].startPatrolTween();
+  }
+  this.player.startPlayer();
+}
+
+Level.prototype.resetLevel = function() {
+  for (var i = 0; i < this.guards.length; i++) {
+    this.guards[i].resetGuard();
+  }
+  console.log("WHOA");
+  this.player.resetPlayer();
+}
+
+Level.prototype.update = function() {
+  if(game.timelineRunning) {
+    for(var i = 0; i < this.guards.length; i++) {
+      this.guards[i].timelineIndex += 1;
+      this.guards[i].timeline.checkForEvent();
+      this.guards[i].canSeePlayer();
+    }
   }
 }
 
@@ -129,6 +177,26 @@ Level.prototype.assignEvents = function() {
   eventArray = LEVEL_TEMPLATE[0][2];
   for(var i = 0; i < eventArray.length; i++) {
     this.guards[eventArray[i].guardIndex].timeline.events.push({ timelineIndex: eventArray[i].timelineIndex, action: eventArray[i].action, duration: eventArray[i].duration })
+  }
+}
+
+Level.prototype.clicked = function() {
+  if(game.timelineRunning === false){
+    if(this.player.clicked()) {
+      this.player.setAsCurPlayer();
+    } else if(game.curPlayer) {
+      var areaElevation = 0
+      for(var i = 0; i < this.areas.length; i++) {
+        if(this.areas[i].clicked()) {
+          areaElevation = this.areas[i].elevation;
+        }
+      }
+      console.log(areaElevation);
+      if(areaElevation == this.player.elevation) {
+        var pos = game.input.activePointer.position
+        game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y));
+      }
+    }
   }
 }
 
@@ -147,9 +215,71 @@ Level.prototype.draw = function() {
     for(var i = 0; i < level.guards.length; i++) {
       if(l == level.guards[i].elevation) level.guards[i].draw();
     }
+    //player
+    level.player.draw();
   }
 }
 
+var Player = function(x,y,actionPoints,elevation,speed) {
+  this.startX = x;
+  this.startY = y;
+  this.position = new Phaser.Point(x,y);
+  this.actionPoints = actionPoints;
+  this.color = 0x0066FF;
+  this.waypoints = [];
+  this.elevation = elevation;
+  this.waypointIndex = 0;
+  this.speed = speed;
+}
+
+Player.prototype.clicked = function() {
+  if(game.input.activePointer.position.distance(this.position) < 5) {
+    return true;
+  }
+  return false;
+}
+
+Player.prototype.setAsCurPlayer = function() {
+  game.curPlayer = this;
+}
+
+Player.prototype.startPlayer = function() {
+  var waypoint = this.waypoints[this.waypointIndex];
+  if(waypoint) {
+    this.waypointIndex += 1;
+    this.tween=game.add.tween(this.position);
+    var distance = this.position.distance(waypoint.position)
+
+    this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+    this.tween.onComplete.add(this.startPlayer, this);
+  }
+}
+
+Player.prototype.resetPlayer = function() {
+  console.log("APPLES")
+  this.position.x = this.startX;
+  this.position.y = this.startY;
+  this.waypointIndex = 0;
+  this.tween.stop();
+}
+
+Player.prototype.removeWaypoint = function() {
+  if(game.timelineRunning === false) {
+    this.waypoints.pop();
+  }
+}
+Player.prototype.draw = function() {
+  //waypoints
+  if(game.timelineRunning === false){
+    for(var i = 0; i < this.waypoints.length; i++) {
+      this.waypoints[i].draw();
+    }
+  }
+
+  game.graphics.beginFill(this.color);
+  game.graphics.drawCircle(this.position.x,this.position.y,5);
+  game.graphics.endFill();
+}
 var Timeline = function(guard) {
   this.guard = guard
   this.events = [];
@@ -164,6 +294,19 @@ Timeline.prototype.checkForEvent = function() {
       this.eventsIndex += 1;
     }
   }
+}
+
+Timeline.prototype.resetTimeline = function() {
+  this.eventsIndex = 0;
+}
+var Waypoint = function(x, y, player) {
+  this.position = new Phaser.Point(x,y);
+  this.player = player;
+}
+Waypoint.prototype.draw = function() {
+  game.graphics.beginFill(this.color);
+  game.graphics.drawCircle(this.position.x,this.position.y,5);
+  game.graphics.endFill();
 }
 WIDTH = 320;
 HEIGHT = 480;
@@ -195,13 +338,15 @@ function setUpLevels() {
       //guards(x,y,elevation,title,patrolPoints,direction)
       [
         new Guard(100,265,0,"basic",[[100,265],[280,265],[280,440],[100,440]],0),
-        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]],270),
-        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]],270)
+        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]],-90),
+        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]],-90)
       ],
       //events
       [
         { guardIndex: 0, action: Guard.prototype.pause, timelineIndex: 1, duration: 2 }
-      ]
+      ],
+      //player(x,y,actionPoints, elevation,speed)
+      new Player(160,440,10,0,3)
     ]
   ]
 }
@@ -250,12 +395,20 @@ var state = {
         game.graphics = game.add.graphics(0,0);
         game.clicked = false;
         game.timelineIndex = 0;
-        game.timelineRunning = true;
+        game.timelineRunning = false;
+        game.curPlayer = null;
 
     },
     preload: function() {
         // STate preload logic goes here
         setUpLevels();
+
+        //inputs
+        space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+        space.onDown.add(spaceEvent, this);
+
+        backspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
+        backspace.onDown.add(backspaceEvent, this);
     },
     create: function(){
       // State create logic goes here
@@ -293,5 +446,19 @@ var game = new Phaser.Game(
 );
 
 function click() {
+  level.clicked();
+}
 
+function spaceEvent() {
+  if(game.timelineRunning) {
+    game.timelineRunning = false;
+    level.resetLevel();
+  } else {
+    game.timelineRunning = true;
+    level.startLevel();
+  }
+}
+
+function backspaceEvent() {
+  level.player.removeWaypoint();
 }

@@ -13,3 +13,7 @@ Timeline.prototype.checkForEvent = function() {
     }
   }
 }
+
+Timeline.prototype.resetTimeline = function() {
+  this.eventsIndex = 0;
+}

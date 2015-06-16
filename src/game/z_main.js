@@ -19,12 +19,20 @@ var state = {
         game.graphics = game.add.graphics(0,0);
         game.clicked = false;
         game.timelineIndex = 0;
-        game.timelineRunning = true;
+        game.timelineRunning = false;
+        game.curPlayer = null;
 
     },
     preload: function() {
         // STate preload logic goes here
         setUpLevels();
+
+        //inputs
+        space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+        space.onDown.add(spaceEvent, this);
+
+        backspace = game.input.keyboard.addKey(Phaser.Keyboard.BACKSPACE);
+        backspace.onDown.add(backspaceEvent, this);
     },
     create: function(){
       // State create logic goes here
@@ -62,5 +70,19 @@ var game = new Phaser.Game(
 );
 
 function click() {
+  level.clicked();
+}
 
+function spaceEvent() {
+  if(game.timelineRunning) {
+    game.timelineRunning = false;
+    level.resetLevel();
+  } else {
+    game.timelineRunning = true;
+    level.startLevel();
+  }
+}
+
+function backspaceEvent() {
+  level.player.removeWaypoint();
 }

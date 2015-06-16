@@ -28,13 +28,15 @@ function setUpLevels() {
       //guards(x,y,elevation,title,patrolPoints,direction)
       [
         new Guard(100,265,0,"basic",[[100,265],[280,265],[280,440],[100,440]],0),
-        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]],270),
-        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]],270)
+        new Guard(WIDTH * 0.3,125,1,"basic",[[WIDTH * 0.3,125]],-90),
+        new Guard(WIDTH * 0.7,125,1,"basic",[[WIDTH * 0.7,125]],-90)
       ],
       //events
       [
         { guardIndex: 0, action: Guard.prototype.pause, timelineIndex: 1, duration: 2 }
-      ]
+      ],
+      //player(x,y,actionPoints, elevation,speed)
+      new Player(160,440,10,0,3)
     ]
   ]
 }
