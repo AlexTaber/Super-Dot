@@ -4,9 +4,9 @@ var Player = function(x,y,actionPoints,elevation,speed) {
   this.position = new Phaser.Point(x,y);
   this.actionPoints = actionPoints;
   this.color = 0x0066FF;
-  this.waypoints = [];
+  this.waypoints = [ new Waypoint(x,y) ];
   this.elevation = elevation;
-  this.waypointIndex = 0;
+  this.waypointIndex = 1;
   this.speed = speed;
 }
 
@@ -37,7 +37,7 @@ Player.prototype.resetPlayer = function() {
   console.log("APPLES")
   this.position.x = this.startX;
   this.position.y = this.startY;
-  this.waypointIndex = 0;
+  this.waypointIndex = 1;
   this.tween.stop();
 }
 

@@ -42,16 +42,20 @@ Level.prototype.clicked = function() {
     if(this.player.clicked()) {
       this.player.setAsCurPlayer();
     } else if(game.curPlayer) {
+      //find elevation
       var areaElevation = 0
       for(var i = 0; i < this.areas.length; i++) {
         if(this.areas[i].clicked()) {
           areaElevation = this.areas[i].elevation;
         }
       }
-      console.log(areaElevation);
+      //check elevation
       if(areaElevation == this.player.elevation) {
-        var pos = game.input.activePointer.position
-        game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y));
+        //check for area in between
+        if(level.checkAreaCollision(level.player.waypoints.last().position, game.input.activePointer.position, this.player.elevation) === false){
+          var pos = game.input.activePointer.position
+          game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y));
+        }
       }
     }
   }
@@ -75,4 +79,13 @@ Level.prototype.draw = function() {
     //player
     level.player.draw();
   }
+}
+
+Level.prototype.checkAreaCollision = function(point1, point2, elevation) {
+  for(var i = 0; i < this.areas.length; i++) {
+    if(this.areas[i].checkCollision(point1, point2, elevation)) {
+      return true;
+    }
+  }
+  return false;
 }

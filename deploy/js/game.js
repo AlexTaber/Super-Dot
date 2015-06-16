@@ -29,6 +29,14 @@ var Area = function(x,y,width, height, elevation) {
   this.width = width;
   this.height = height;
   this.color = AREA_COLORS[elevation];
+  this.lines = this.setUpLines();
+  this.collisionLine = new Phaser.Line();
+}
+
+Area.prototype.setUpLines = function() {
+  var line1 = new Phaser.Line(this.position.x, this.position.y, this.position.x + this.width, this.position.y + this.height);
+  var line2 = new Phaser.Line(this.position.x + this.width, this.position.y, this.position.x,this.position.y + this.height);
+  return [line1, line2]
 }
 
 Area.prototype.clicked = function() {
@@ -41,6 +49,16 @@ Area.prototype.clicked = function() {
   return false;
 }
 
+Area.prototype.checkCollision = function(point1, point2, elevation) {
+  this.collisionLine.start = point1;
+  this.collisionLine.end = point2;
+  for(var i = 0; i < this.lines.length; i++) {
+    if(this.lines[i].intersects(this.collisionLine) && elevation != this.elevation) {
+      return true;
+    }
+  }
+  return false;
+}
 Area.prototype.draw = function() {
   game.graphics.beginFill(this.color);
   game.graphics.drawRect(this.position.x, this.position.y, this.width, this.height);
@@ -185,16 +203,20 @@ Level.prototype.clicked = function() {
     if(this.player.clicked()) {
       this.player.setAsCurPlayer();
     } else if(game.curPlayer) {
+      //find elevation
       var areaElevation = 0
       for(var i = 0; i < this.areas.length; i++) {
         if(this.areas[i].clicked()) {
           areaElevation = this.areas[i].elevation;
         }
       }
-      console.log(areaElevation);
+      //check elevation
       if(areaElevation == this.player.elevation) {
-        var pos = game.input.activePointer.position
-        game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y));
+        //check for area in between
+        if(level.checkAreaCollision(level.player.waypoints.last().position, game.input.activePointer.position, this.player.elevation) === false){
+          var pos = game.input.activePointer.position
+          game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y));
+        }
       }
     }
   }
@@ -220,15 +242,23 @@ Level.prototype.draw = function() {
   }
 }
 
+Level.prototype.checkAreaCollision = function(point1, point2, elevation) {
+  for(var i = 0; i < this.areas.length; i++) {
+    if(this.areas[i].checkCollision(point1, point2, elevation)) {
+      return true;
+    }
+  }
+  return false;
+}
 var Player = function(x,y,actionPoints,elevation,speed) {
   this.startX = x;
   this.startY = y;
   this.position = new Phaser.Point(x,y);
   this.actionPoints = actionPoints;
   this.color = 0x0066FF;
-  this.waypoints = [];
+  this.waypoints = [ new Waypoint(x,y) ];
   this.elevation = elevation;
-  this.waypointIndex = 0;
+  this.waypointIndex = 1;
   this.speed = speed;
 }
 
@@ -259,7 +289,7 @@ Player.prototype.resetPlayer = function() {
   console.log("APPLES")
   this.position.x = this.startX;
   this.position.y = this.startY;
-  this.waypointIndex = 0;
+  this.waypointIndex = 1;
   this.tween.stop();
 }
 
@@ -324,6 +354,10 @@ function setUpLevels() {
     [
       //area(x,y,width,height,elevation)
       [
+        new Area(0,150,WIDTH,150,0),
+        new Area(WIDTH * 0.2,300,WIDTH*0.2,120,0),
+        new Area(WIDTH * 0.8,300,WIDTH*0.2,120,0),
+        new Area(0,420,WIDTH,480,0),
         new Area(0,0,WIDTH,100,3),
         new Area(WIDTH * 0.2,100,WIDTH * 0.4,50,1),
         new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
@@ -373,6 +407,10 @@ function findPointFromAngle(startingPoint, distance, angle) {
   new_x = startingPoint.x + Math.cos(Phaser.Math.degToRad(angle)) * distance;
   new_y = startingPoint.y - Math.sin(Phaser.Math.degToRad(angle)) * distance;
   return { x: new_x, y: new_y };
+}
+
+Array.prototype.last = function() {
+  return this[this.length - 1]
 }
 /**
  *

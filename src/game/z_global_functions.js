@@ -14,6 +14,10 @@ function setUpLevels() {
     [
       //area(x,y,width,height,elevation)
       [
+        new Area(0,150,WIDTH,150,0),
+        new Area(WIDTH * 0.2,300,WIDTH*0.2,120,0),
+        new Area(WIDTH * 0.8,300,WIDTH*0.2,120,0),
+        new Area(0,420,WIDTH,480,0),
         new Area(0,0,WIDTH,100,3),
         new Area(WIDTH * 0.2,100,WIDTH * 0.4,50,1),
         new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
@@ -63,4 +67,8 @@ function findPointFromAngle(startingPoint, distance, angle) {
   new_x = startingPoint.x + Math.cos(Phaser.Math.degToRad(angle)) * distance;
   new_y = startingPoint.y - Math.sin(Phaser.Math.degToRad(angle)) * distance;
   return { x: new_x, y: new_y };
+}
+
+Array.prototype.last = function() {
+  return this[this.length - 1]
 }
