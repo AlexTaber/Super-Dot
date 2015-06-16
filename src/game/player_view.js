@@ -2,7 +2,7 @@ Player.prototype.draw = function() {
   //waypoints
   if(game.timelineRunning === false){
     for(var i = 0; i < this.waypoints.length; i++) {
-      this.waypoints[i].draw();
+      this.waypoints[i].draw(this.waypoints[i-1]);
     }
   }
 

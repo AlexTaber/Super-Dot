@@ -302,7 +302,7 @@ Player.prototype.draw = function() {
   //waypoints
   if(game.timelineRunning === false){
     for(var i = 0; i < this.waypoints.length; i++) {
-      this.waypoints[i].draw();
+      this.waypoints[i].draw(this.waypoints[i-1]);
     }
   }
 
@@ -332,11 +332,19 @@ Timeline.prototype.resetTimeline = function() {
 var Waypoint = function(x, y, player) {
   this.position = new Phaser.Point(x,y);
   this.player = player;
+  this.color = 0x66A3FF;
 }
-Waypoint.prototype.draw = function() {
+Waypoint.prototype.draw = function(prevWaypoint) {
   game.graphics.beginFill(this.color);
   game.graphics.drawCircle(this.position.x,this.position.y,5);
   game.graphics.endFill();
+
+  if(prevWaypoint) {
+    game.graphics.lineStyle(2,this.color);
+    game.graphics.moveTo(this.position.x, this.position.y);
+    game.graphics.lineTo(prevWaypoint.position.x, prevWaypoint.position.y);
+    game.graphics.lineStyle();
+  }
 }
 WIDTH = 320;
 HEIGHT = 480;
