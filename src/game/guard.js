@@ -34,7 +34,7 @@ Guard.prototype.canSeePlayer = function() {
 
 Guard.prototype.pause = function(time) {
   this.tween.pause();
-  this.direction = 270;
+  this.direction = -90;
   game.time.events.add(Phaser.Timer.SECOND * time, this.unPause, this);
 }
 

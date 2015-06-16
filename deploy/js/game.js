@@ -100,7 +100,7 @@ Guard.prototype.canSeePlayer = function() {
 
 Guard.prototype.pause = function(time) {
   this.tween.pause();
-  this.direction = 270;
+  this.direction = -90;
   game.time.events.add(Phaser.Timer.SECOND * time, this.unPause, this);
 }
 
@@ -201,7 +201,10 @@ Level.prototype.assignEvents = function() {
 Level.prototype.clicked = function() {
   if(game.timelineRunning === false){
     if(this.player.clicked()) {
+      //clicked player
       this.player.setAsCurPlayer();
+    } else if(this.player.waypointClicked()){
+      //clicked waypoint
     } else if(game.curPlayer) {
       //find elevation
       var areaElevation = 0
@@ -215,7 +218,7 @@ Level.prototype.clicked = function() {
         //check for area in between
         if(level.checkAreaCollision(level.player.waypoints.last().position, game.input.activePointer.position, this.player.elevation) === false){
           var pos = game.input.activePointer.position
-          game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y));
+          game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this.player, Player.prototype.startPlayer));
         }
       }
     }
@@ -269,8 +272,21 @@ Player.prototype.clicked = function() {
   return false;
 }
 
+Player.prototype.waypointClicked = function() {
+  for(var i = 0; i < this.waypoints.length; i++) {
+    if(this.waypoints[i].clicked()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 Player.prototype.setAsCurPlayer = function() {
   game.curPlayer = this;
+}
+
+Player.prototype.pause = function() {
+  game.time.events.add(this.waypoints[this.waypointIndex - 1].duration, this.startPlayer, this);
 }
 
 Player.prototype.startPlayer = function() {
@@ -281,7 +297,7 @@ Player.prototype.startPlayer = function() {
     var distance = this.position.distance(waypoint.position)
 
     this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
-    this.tween.onComplete.add(this.startPlayer, this);
+    this.tween.onComplete.add(waypoint.action, this);
   }
 }
 
@@ -329,10 +345,28 @@ Timeline.prototype.checkForEvent = function() {
 Timeline.prototype.resetTimeline = function() {
   this.eventsIndex = 0;
 }
-var Waypoint = function(x, y, player) {
+var Waypoint = function(x, y, player,action,duration) {
   this.position = new Phaser.Point(x,y);
   this.player = player;
   this.color = 0x66A3FF;
+  this.action = action;
+  this.duration = duration;
+}
+
+Waypoint.prototype.clicked = function() {
+  if(game.input.activePointer.position.distance(this.position) < 5) {
+    this.clickEvent();
+    return true;
+  }
+  return false;
+}
+
+Waypoint.prototype.clickEvent = function() {
+  if(level.curWaypoint == this){
+
+  } else {
+    level.curWaypoint = this;
+  }
 }
 Waypoint.prototype.draw = function(prevWaypoint) {
   game.graphics.beginFill(this.color);

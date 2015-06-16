@@ -17,8 +17,21 @@ Player.prototype.clicked = function() {
   return false;
 }
 
+Player.prototype.waypointClicked = function() {
+  for(var i = 0; i < this.waypoints.length; i++) {
+    if(this.waypoints[i].clicked()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 Player.prototype.setAsCurPlayer = function() {
   game.curPlayer = this;
+}
+
+Player.prototype.pause = function() {
+  game.time.events.add(this.waypoints[this.waypointIndex - 1].duration, this.startPlayer, this);
 }
 
 Player.prototype.startPlayer = function() {
@@ -29,7 +42,7 @@ Player.prototype.startPlayer = function() {
     var distance = this.position.distance(waypoint.position)
 
     this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
-    this.tween.onComplete.add(this.startPlayer, this);
+    this.tween.onComplete.add(waypoint.action, this);
   }
 }
 
