@@ -39,28 +39,7 @@ Level.prototype.assignEvents = function() {
 
 Level.prototype.clicked = function() {
   if(game.timelineRunning === false){
-    if(this.player.clicked()) {
-      //clicked player
-      this.player.setAsCurPlayer();
-    } else if(this.player.waypointClicked()){
-      //clicked waypoint
-    } else if(game.curPlayer) {
-      //find elevation
-      var areaElevation = 0
-      for(var i = 0; i < this.areas.length; i++) {
-        if(this.areas[i].clicked()) {
-          areaElevation = this.areas[i].elevation;
-        }
-      }
-      //check elevation
-      if(areaElevation == this.player.elevation) {
-        //check for area in between
-        if(level.checkAreaCollision(level.player.waypoints.last().position, game.input.activePointer.position, this.player.elevation) === false){
-          var pos = game.input.activePointer.position
-          game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this.player, Player.prototype.startPlayer));
-        }
-      }
-    }
+    this.player.clickEvent();
   }
 }
 
