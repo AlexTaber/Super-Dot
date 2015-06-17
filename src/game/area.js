@@ -32,3 +32,10 @@ Area.prototype.checkCollision = function(point1, point2, elevation) {
   }
   return false;
 }
+
+Area.prototype.collisionPoint = function(point) {
+  if(pointInBox(point.x,point.y,this.position.x,this.position.y,this.position.x + this.width, this.position.y + this.height)){
+    return true;
+  }
+  return false;
+}
