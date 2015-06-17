@@ -10,6 +10,7 @@ Level.prototype.startLevel = function() {
     this.guards[i].startPatrolTween();
   }
   this.player.startPlayer();
+  this.player.resetPowerText();
 }
 
 Level.prototype.resetLevel = function() {
