@@ -18,10 +18,10 @@ Player.prototype.clickEvent = function() {
   //player clicked
   if(this.clicked()) {
     this.setAsCurPlayer();
-  } //waypoint clicked
+  } //waypoint menu clicked
   else if(this.waypointMenuClicked()){
 
-  } // waypoint menu clicked
+  } // waypoint clicked
   else if(this.waypointClicked()) {
 
   } //powers
@@ -97,6 +97,7 @@ Player.prototype.removeWaypoint = function() {
 
 Player.prototype.resetCurWaypoint = function() {
   game.curWaypoint = null;
+  this.state = "default";
 }
 
 Player.prototype.findElevation = function() {

@@ -18,9 +18,17 @@ Waypoint.prototype.draw = function(prevWaypoint) {
 
 Waypoint.prototype.drawMenu = function() {
   var startPoint = this.findMenuStartPosition();
-  game.graphics.beginFill(0xD6EBFF, 0.7)
+  //background
+  game.graphics.beginFill(0x99ADC2, 0.7)
   game.graphics.drawRect(startPoint.x, startPoint.y, MENU_WIDTH, MENU_HEIGHT);
   game.graphics.endFill();
+
+  for(var i = 0; i < this.player.powers.length; i++) {
+    var power = this.player.powers[i];
+    game.graphics.beginFill(0x003366);
+    game.graphics.drawRect(startPoint.x,startPoint.y + ((MENU_HEIGHT/4) * i),MENU_WIDTH,(MENU_HEIGHT/4) - 1);
+    game.graphics.endFill();
+  }
 }
 
 Waypoint.prototype.findMenuStartPosition = function() {
