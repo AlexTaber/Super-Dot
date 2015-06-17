@@ -84,5 +84,9 @@ function spaceEvent() {
 }
 
 function backspaceEvent() {
-  level.player.removeWaypoint();
+  if(game.curWaypoint){
+    level.player.resetCurWaypoint();
+  } else {
+    level.player.removeWaypoint();
+  }
 }

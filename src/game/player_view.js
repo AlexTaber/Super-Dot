@@ -1,4 +1,13 @@
 Player.prototype.draw = function() {
+  //powers
+  if(this.state != "default") {
+    if(this.state = "jump") {
+      game.graphics.beginFill(0xCCEBFF, 0.5);
+      game.graphics.drawCircle(game.curWaypoint.position.x,game.curWaypoint.position.y,40);
+      game.graphics.endFill();
+    }
+  }
+
   //waypoints
   if(game.timelineRunning === false){
     for(var i = 0; i < this.waypoints.length; i++) {

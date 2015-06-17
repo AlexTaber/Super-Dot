@@ -16,10 +16,8 @@ Area.prototype.setUpLines = function() {
 
 Area.prototype.clicked = function() {
   var pos = game.input.activePointer.position;
-  if(pos.x > this.position.x && pos.x < this.position.x + this.width){
-    if(pos.y > this.position.y && pos.y < this.position.y + this.height){
-      return true;
-    }
+  if(pointInBox(pos.x,pos.y,this.position.x,this.position.y,this.position.x + this.width, this.position.y + this.height)){
+    return true;
   }
   return false;
 }

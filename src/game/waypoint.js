@@ -4,6 +4,17 @@ var Waypoint = function(x, y, player,action,duration) {
   this.color = 0x66A3FF;
   this.action = action;
   this.duration = duration;
+  this.params = {}
+}
+
+Waypoint.prototype.menuClicked = function() {
+  var pos = game.input.activePointer.position;
+  var menuX = this.position.x + MENU_X
+  var menuY = this.position.y + MENU_Y
+  if(pointInBox(pos.x,pos.y,menuX,menuY,menuX + MENU_WIDTH, menuY + MENU_HEIGHT)){
+    return true;
+  }
+  return false;
 }
 
 Waypoint.prototype.clicked = function() {

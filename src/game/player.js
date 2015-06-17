@@ -9,7 +9,7 @@ var Player = function(x,y,actionPoints,elevation,speed) {
   this.waypointIndex = 1;
   this.speed = speed;
   this.state = "default";
-  this.powers = [ new Power(this, "Jump", Power.prototype.jump) ];
+  this.powers = [ new Power(this, "Jump", Power.prototype.jump, "jump") ];
 }
 
 Player.prototype.clickEvent = function() {
@@ -19,9 +19,12 @@ Player.prototype.clickEvent = function() {
   } //waypoint clicked
   else if(this.waypointClicked()) {
 
+  } // waypoint menu clicked
+  else if(this.waypointMenuClicked()){
+
   } //powers
   else if(this.state != "default") {
-
+    game.curPower.clickEvent();
   } // set waypoint
   else if(game.curPlayer == this) {
     this.setWaypoint();
@@ -39,6 +42,15 @@ Player.prototype.waypointClicked = function() {
   for(var i = 0; i < this.waypoints.length; i++) {
     if(this.waypoints[i].clicked()) {
       game.curWaypoint = this.waypoints[i];
+      return true;
+    }
+  }
+  return false;
+}
+
+Player.prototype.waypointMenuClicked = function() {
+  if(game.curWaypoint) {
+    if(game.curWaypoint.menuClicked()){
       return true;
     }
   }
@@ -74,9 +86,13 @@ Player.prototype.resetPlayer = function() {
 }
 
 Player.prototype.removeWaypoint = function() {
-  if(game.timelineRunning === false) {
+  if(game.timelineRunning === false && this.waypoints.length > 1) {
     this.waypoints.pop();
   }
+}
+
+Player.prototype.resetCurWaypoint = function() {
+  game.curWaypoint = null;
 }
 
 Player.prototype.setWaypoint = function() {

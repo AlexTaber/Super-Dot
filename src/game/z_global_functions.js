@@ -1,6 +1,11 @@
 WIDTH = 320;
 HEIGHT = 480;
 
+MENU_WIDTH = 64;
+MENU_HEIGHT = 128;
+MENU_X = 32;
+MENU_Y = -32
+
 AREA_COLORS = [
   0xe5e5e5,
   0x999999,
@@ -71,4 +76,13 @@ function findPointFromAngle(startingPoint, distance, angle) {
 
 Array.prototype.last = function() {
   return this[this.length - 1]
+}
+
+function pointInBox(x,y,x1,y1,x2,y2) {
+  if(x > x1 && x < x2) {
+    if(y > y1 && y < y2) {
+      return true;
+    }
+  }
+  return false;
 }
