@@ -18,10 +18,10 @@ Player.prototype.clickEvent = function() {
   //player clicked
   if(this.clicked()) {
     this.setAsCurPlayer();
-  } //waypoint clicked
+  } //waypoint menu clicked
   else if(this.waypointMenuClicked()){
 
-  } // waypoint menu clicked
+  } // waypoint clicked
   else if(this.waypointClicked()) {
 
   } //powers
@@ -97,6 +97,8 @@ Player.prototype.removeWaypoint = function() {
 
 Player.prototype.resetCurWaypoint = function() {
   game.curWaypoint = null;
+  this.state = "default";
+  this.resetPowerText();
 }
 
 Player.prototype.findElevation = function() {
@@ -127,4 +129,13 @@ Player.prototype.setUpPowers = function() {
   pow.action = newPow.action;
   pow.player = this;
   pow.clickState = newPow.clickState;
+  pow.text = game.add.text(game.world.centerX, game.world.centerY, newPow.name, { font: "16px Arial", fill: "#CCCCCC", align: "center" });
+  console.log(pow.text);
+  pow.text.visible = false;
+}
+
+Player.prototype.resetPowerText = function() {
+  for(var i = 0; i < this.powers.length; i++) {
+    this.powers[i].text.visible = false;
+  }
 }

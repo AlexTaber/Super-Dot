@@ -169,6 +169,7 @@ Level.prototype.startLevel = function() {
     this.guards[i].startPatrolTween();
   }
   this.player.startPlayer();
+  this.player.resetPowerText();
 }
 
 Level.prototype.resetLevel = function() {
@@ -250,10 +251,10 @@ Player.prototype.clickEvent = function() {
   //player clicked
   if(this.clicked()) {
     this.setAsCurPlayer();
-  } //waypoint clicked
+  } //waypoint menu clicked
   else if(this.waypointMenuClicked()){
 
-  } // waypoint menu clicked
+  } // waypoint clicked
   else if(this.waypointClicked()) {
 
   } //powers
@@ -329,6 +330,8 @@ Player.prototype.removeWaypoint = function() {
 
 Player.prototype.resetCurWaypoint = function() {
   game.curWaypoint = null;
+  this.state = "default";
+  this.resetPowerText();
 }
 
 Player.prototype.findElevation = function() {
@@ -359,6 +362,15 @@ Player.prototype.setUpPowers = function() {
   pow.action = newPow.action;
   pow.player = this;
   pow.clickState = newPow.clickState;
+  pow.text = game.add.text(game.world.centerX, game.world.centerY, newPow.name, { font: "16px Arial", fill: "#CCCCCC", align: "center" });
+  console.log(pow.text);
+  pow.text.visible = false;
+}
+
+Player.prototype.resetPowerText = function() {
+  for(var i = 0; i < this.powers.length; i++) {
+    this.powers[i].text.visible = false;
+  }
 }
 Player.prototype.draw = function() {
   //powers
@@ -463,9 +475,24 @@ Waypoint.prototype.menuClicked = function() {
   var menuX = this.position.x + MENU_X
   var menuY = this.position.y + MENU_Y
   if(pointInBox(pos.x,pos.y,menuX,menuY,menuX + MENU_WIDTH, menuY + MENU_HEIGHT)){
+    this.menuClickEvent();
     return true;
   }
   return false;
+}
+
+Waypoint.prototype.menuClickEvent = function() {
+  for(var i = 0; i < this.player.powers.length; i++) {
+    var startPoint = this.findMenuStartPosition();
+    var x1 = startPoint.x;
+    var y1 = startPoint.y + ((MENU_HEIGHT/4) * i);
+    var x2 = x1 + MENU_WIDTH;
+    var y2 = y1 + (MENU_HEIGHT/4) - 1;
+    var point = game.input.activePointer.position;
+    if(pointInBox(point.x,point.y,x1,y1,x2,y2)) {
+      this.player.powers[i].clicked();
+    }
+  }
 }
 
 Waypoint.prototype.clicked = function() {
@@ -498,15 +525,28 @@ Waypoint.prototype.draw = function(prevWaypoint) {
 
   //menu
   if(game.curWaypoint == this){
+    this.drawCurWaypointCircle();
     this.drawMenu();
   }
 }
 
 Waypoint.prototype.drawMenu = function() {
   var startPoint = this.findMenuStartPosition();
-  game.graphics.beginFill(0xD6EBFF, 0.7)
+  //background
+  game.graphics.beginFill(0x99ADC2, 0.7)
   game.graphics.drawRect(startPoint.x, startPoint.y, MENU_WIDTH, MENU_HEIGHT);
   game.graphics.endFill();
+
+  for(var i = 0; i < this.player.powers.length; i++) {
+    var power = this.player.powers[i];
+    game.graphics.beginFill(0x003366);
+    game.graphics.drawRect(startPoint.x,startPoint.y + ((MENU_HEIGHT/4) * i),MENU_WIDTH,(MENU_HEIGHT/4) - 1);
+    game.graphics.endFill();
+
+    power.text.position.x = startPoint.x + 4;
+    power.text.position.y = startPoint.y + 4;
+    power.text.visible = true;
+  }
 }
 
 Waypoint.prototype.findMenuStartPosition = function() {
@@ -514,6 +554,12 @@ Waypoint.prototype.findMenuStartPosition = function() {
   point.x = Math.min(this.position.x + MENU_X, WIDTH - MENU_WIDTH);
   point.y = Math.min(this.position.y + MENU_Y, HEIGHT - MENU_HEIGHT);
   return point;
+}
+
+Waypoint.prototype.drawCurWaypointCircle = function() {
+  game.graphics.lineStyle(2, this.color);
+  game.graphics.drawCircle(this.position.x, this.position.y, 7);
+  game.graphics.lineStyle();
 }
 WIDTH = 320;
 HEIGHT = 480;
