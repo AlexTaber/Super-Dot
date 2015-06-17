@@ -17,7 +17,6 @@ Level.prototype.resetLevel = function() {
   for (var i = 0; i < this.guards.length; i++) {
     this.guards[i].resetGuard();
   }
-  console.log("WHOA");
   this.player.resetPlayer();
 }
 

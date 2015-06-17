@@ -55,7 +55,6 @@ Guard.prototype.startPatrolTween = function() {
 
     this.tween.to({x: this.points[this.patrolIndex].x, y: this.points[this.patrolIndex].y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
     this.direction = Phaser.Math.radToDeg(Phaser.Point.angle(this.position,this.points[this.patrolIndex]));
-    console.log(this.direction);
     this.tween.onComplete.add(this.startPatrolTween, this);
   }
   //p.start();

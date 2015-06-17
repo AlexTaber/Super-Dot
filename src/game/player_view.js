@@ -1,7 +1,7 @@
 Player.prototype.draw = function() {
   //powers
   if(this.state != "default") {
-    if(this.state = "jump") {
+    if(this.state == "jump") {
       game.graphics.beginFill(0xCCEBFF, 0.5);
       game.graphics.drawCircle(game.curWaypoint.position.x,game.curWaypoint.position.y,40);
       game.graphics.endFill();

@@ -16,7 +16,8 @@ AREA_COLORS = [
 function setUpLevels() {
   PLAYER_DATA = {
     powers: [
-      {name: "Jump", action: Power.prototype.jump, clickState: "jump"}
+      { name: "Jump", action: Power.prototype.jump, clickState: "jump" },
+      { name: "Fly", action: Power.prototype.fly, clickState: "fly" }
     ]
   }
   LEVEL_TEMPLATE = [
@@ -29,7 +30,7 @@ function setUpLevels() {
         new Area(WIDTH * 0.8,300,WIDTH*0.2,120,0),
         new Area(0,420,WIDTH,480,0),
         new Area(0,0,WIDTH,100,3),
-        new Area(WIDTH * 0.2,100,WIDTH * 0.4,50,1),
+        new Area(WIDTH * 0.2,100,WIDTH * 0.2,50,1),
         new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
         new Area(WIDTH * 0.4,100,WIDTH * 0.2,50,3),
         new Area(0,100, WIDTH * 0.2, 50, 2),

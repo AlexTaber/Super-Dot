@@ -31,7 +31,7 @@ Waypoint.prototype.drawMenu = function() {
     game.graphics.endFill();
 
     power.text.position.x = startPoint.x + 4;
-    power.text.position.y = startPoint.y + 4;
+    power.text.position.y = startPoint.y + 4 + ((MENU_HEIGHT/4) * i);
     power.text.visible = true;
   }
 }

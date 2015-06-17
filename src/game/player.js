@@ -80,7 +80,6 @@ Player.prototype.startPlayer = function() {
 }
 
 Player.prototype.resetPlayer = function() {
-  console.log("APPLES")
   this.position.x = this.startX;
   this.position.y = this.startY;
   this.waypointIndex = 1;
@@ -101,16 +100,16 @@ Player.prototype.resetCurWaypoint = function() {
   this.resetPowerText();
 }
 
-Player.prototype.findElevation = function() {
+Player.prototype.findElevation = function(point) {
   for(var i = 0; i < level.areas.length; i++) {
-    if(level.areas[i].clicked()) {
+    if(level.areas[i].collisionPoint(point)) {
       return level.areas[i].elevation;
     }
   }
 }
 
 Player.prototype.setWaypoint = function() {
-  var areaElevation = this.findElevation();
+  var areaElevation = this.findElevation(game.input.activePointer.position);
   //check elevation
   if(areaElevation == this.waypoints.last().elevation) {
     //check for area in between
@@ -122,16 +121,18 @@ Player.prototype.setWaypoint = function() {
 }
 
 Player.prototype.setUpPowers = function() {
-  this.powers.push(new Power());
-  var pow = this.powers.last();
-  var newPow = PLAYER_DATA.powers[0]
-  pow.name = newPow.name;
-  pow.action = newPow.action;
-  pow.player = this;
-  pow.clickState = newPow.clickState;
-  pow.text = game.add.text(game.world.centerX, game.world.centerY, newPow.name, { font: "16px Arial", fill: "#CCCCCC", align: "center" });
-  console.log(pow.text);
-  pow.text.visible = false;
+  for(var i = 0; i < PLAYER_DATA.powers.length; i++) {
+    this.powers.push(new Power());
+    var pow = this.powers.last();
+    var newPow = PLAYER_DATA.powers[i]
+    pow.name = newPow.name;
+    pow.action = newPow.action;
+    pow.player = this;
+    pow.clickState = newPow.clickState;
+    pow.text = game.add.text(game.world.centerX, game.world.centerY, newPow.name, { font: "16px Arial", fill: "#CCCCCC", align: "center" });
+    console.log(pow.text);
+    pow.text.visible = false;
+  }
 }
 
 Player.prototype.resetPowerText = function() {
