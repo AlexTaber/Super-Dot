@@ -237,11 +237,13 @@ var Player = function(x,y,actionPoints,elevation,speed) {
   this.actionPoints = actionPoints;
   this.color = 0x0066FF;
   this.waypoints = [ new Waypoint(x,y) ];
+  this.waypoints.last().elevation = elevation;
   this.elevation = elevation;
   this.waypointIndex = 1;
   this.speed = speed;
   this.state = "default";
-  this.powers = [ new Power(this, "Jump", Power.prototype.jump, "jump") ];
+  this.powers = [];
+  this.setUpPowers();
 }
 
 Player.prototype.clickEvent = function() {
@@ -249,10 +251,10 @@ Player.prototype.clickEvent = function() {
   if(this.clicked()) {
     this.setAsCurPlayer();
   } //waypoint clicked
-  else if(this.waypointClicked()) {
+  else if(this.waypointMenuClicked()){
 
   } // waypoint menu clicked
-  else if(this.waypointMenuClicked()){
+  else if(this.waypointClicked()) {
 
   } //powers
   else if(this.state != "default") {
@@ -305,7 +307,7 @@ Player.prototype.startPlayer = function() {
     var distance = this.position.distance(waypoint.position)
 
     this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
-    this.tween.onComplete.add(waypoint.action, this);
+    this.tween.onComplete.add(waypoint.action, waypoint.listener);
   }
 }
 
@@ -327,21 +329,34 @@ Player.prototype.resetCurWaypoint = function() {
   game.curWaypoint = null;
 }
 
-Player.prototype.setWaypoint = function() {
-  var areaElevation = 0
+Player.prototype.findElevation = function() {
   for(var i = 0; i < level.areas.length; i++) {
     if(level.areas[i].clicked()) {
-      areaElevation = level.areas[i].elevation;
+      return level.areas[i].elevation;
     }
   }
+}
+
+Player.prototype.setWaypoint = function() {
+  var areaElevation = this.findElevation();
   //check elevation
-  if(areaElevation == this.elevation) {
+  if(areaElevation == this.waypoints.last().elevation) {
     //check for area in between
-    if(level.checkAreaCollision(this.waypoints.last().position, game.input.activePointer.position, this.elevation) === false){
+    if(level.checkAreaCollision(this.waypoints.last().position, game.input.activePointer.position, this.waypoints.last().elevation) === false){
       var pos = game.input.activePointer.position
-      game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this, Player.prototype.startPlayer));
+      game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this, Player.prototype.startPlayer,0,areaElevation));
     }
   }
+}
+
+Player.prototype.setUpPowers = function() {
+  this.powers.push(new Power());
+  var pow = this.powers.last();
+  var newPow = PLAYER_DATA.powers[0]
+  pow.name = newPow.name;
+  pow.action = newPow.action;
+  pow.player = this;
+  pow.clickState = newPow.clickState;
 }
 Player.prototype.draw = function() {
   //powers
@@ -372,19 +387,29 @@ var Power = function(player,name,action,clickState) {
 }
 
 Power.prototype.clicked = function() {
+  game.curPower = this;
+  game.curWaypoint.action = this.action;
+  game.curWaypoint.listener = game.curWaypoint;
   this.player.state = this.clickState;
 }
 
-Power.prototype.jump = function(params) {
-  this.player.position.x = params.x;
-  this.player.position.y = params.y;
-  this.player.elevation = params.elevation;
+Power.prototype.jump = function() {
+  console.log(this);
+  this.player.position.x = this.params.x;
+  this.player.position.y = this.params.y;
+  this.player.elevation = this.params.elevation;
+  this.player.waypointIndex += 1;
+  this.player.startPlayer();
 }
 
 Power.prototype.clickEvent = function() {
   if(this.player.state == "jump"){
-    mPos = game.input.activePointer.position;
-    if(mPos.distance(this.position) < 40) {
+    var mPos = game.input.activePointer.position;
+    if(mPos.distance(game.curWaypoint.position) < 40) {
+      game.curPlayer.waypoints.push( new Waypoint(mPos.x,mPos.y,game.curPlayer,Player.prototype.startPlayer,0,this.player.findElevation() ))
+      game.curWaypoint.params.x = mPos.x;
+      game.curWaypoint.params.y = mPos.y;
+      game.curWaypoint.params.elevation = game.curPlayer.findElevation();
       this.player.state = "default";
     }
   }
@@ -411,13 +436,15 @@ Timeline.prototype.checkForEvent = function() {
 Timeline.prototype.resetTimeline = function() {
   this.eventsIndex = 0;
 }
-var Waypoint = function(x, y, player,action,duration) {
+var Waypoint = function(x, y, player,action,duration,elevation) {
   this.position = new Phaser.Point(x,y);
   this.player = player;
   this.color = 0x66A3FF;
   this.action = action;
   this.duration = duration;
   this.params = {}
+  this.listener = player;
+  this.elevation = elevation
 }
 
 Waypoint.prototype.menuClicked = function() {
@@ -481,7 +508,7 @@ WIDTH = 320;
 HEIGHT = 480;
 
 MENU_WIDTH = 64;
-MENU_HEIGHT = 128;
+MENU_HEIGHT = 96;
 MENU_X = 32;
 MENU_Y = -32
 
@@ -493,6 +520,11 @@ AREA_COLORS = [
 ]
 
 function setUpLevels() {
+  PLAYER_DATA = {
+    powers: [
+      {name: "Jump", action: Power.prototype.jump, clickState: "jump"}
+    ]
+  }
   LEVEL_TEMPLATE = [
     //level 0
     [
@@ -588,6 +620,7 @@ var state = {
         game.timelineIndex = 0;
         game.timelineRunning = false;
         game.curPlayer = null;
+        game.curPower = null;
 
     },
     preload: function() {

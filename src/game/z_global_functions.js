@@ -2,7 +2,7 @@ WIDTH = 320;
 HEIGHT = 480;
 
 MENU_WIDTH = 64;
-MENU_HEIGHT = 128;
+MENU_HEIGHT = 96;
 MENU_X = 32;
 MENU_Y = -32
 
@@ -14,6 +14,11 @@ AREA_COLORS = [
 ]
 
 function setUpLevels() {
+  PLAYER_DATA = {
+    powers: [
+      {name: "Jump", action: Power.prototype.jump, clickState: "jump"}
+    ]
+  }
   LEVEL_TEMPLATE = [
     //level 0
     [

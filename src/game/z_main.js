@@ -21,6 +21,7 @@ var state = {
         game.timelineIndex = 0;
         game.timelineRunning = false;
         game.curPlayer = null;
+        game.curPower = null;
 
     },
     preload: function() {
