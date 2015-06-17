@@ -90,6 +90,8 @@ Player.prototype.resetPlayer = function() {
 Player.prototype.removeWaypoint = function() {
   if(game.timelineRunning === false && this.waypoints.length > 1) {
     this.waypoints.pop();
+    this.waypoints.last().action = this.startPlayer;
+    this.waypoints.last().listener = this;
   }
 }
 

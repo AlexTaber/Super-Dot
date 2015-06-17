@@ -322,6 +322,8 @@ Player.prototype.resetPlayer = function() {
 Player.prototype.removeWaypoint = function() {
   if(game.timelineRunning === false && this.waypoints.length > 1) {
     this.waypoints.pop();
+    this.waypoints.last().action = this.startPlayer;
+    this.waypoints.last().listener = this;
   }
 }
 
@@ -394,12 +396,21 @@ Power.prototype.clicked = function() {
 }
 
 Power.prototype.jump = function() {
-  console.log(this);
-  this.player.position.x = this.params.x;
-  this.player.position.y = this.params.y;
-  this.player.elevation = this.params.elevation;
-  this.player.waypointIndex += 1;
-  this.player.startPlayer();
+  // console.log(this);
+  // this.player.position.x = this.params.x;
+  // this.player.position.y = this.params.y;
+  // this.player.elevation = this.params.elevation;
+  // this.player.waypointIndex += 1;
+  // this.player.startPlayer();
+  var waypoint = this.player.waypoints[this.player.waypointIndex];
+  if(waypoint) {
+    this.player.waypointIndex += 1;
+    this.player.tween=game.add.tween(this.player.position);
+    var distance = this.player.position.distance(waypoint.position)
+
+    this.player.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.player.speed) * 120, Phaser.Easing.Linear.None, true);
+    this.player.tween.onComplete.add(waypoint.action, waypoint.listener);
+  }
 }
 
 Power.prototype.clickEvent = function() {
