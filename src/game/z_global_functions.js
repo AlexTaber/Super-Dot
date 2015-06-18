@@ -6,6 +6,8 @@ MENU_HEIGHT = 96;
 MENU_X = 32;
 MENU_Y = -32
 
+CELL_SIZE = 32;
+
 AREA_COLORS = [
   0xe5e5e5,
   0x999999,
