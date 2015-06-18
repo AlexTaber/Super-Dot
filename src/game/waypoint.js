@@ -11,9 +11,8 @@ var Waypoint = function(x, y, player,action,duration,elevation) {
 
 Waypoint.prototype.menuClicked = function() {
   var pos = game.input.activePointer.position;
-  var menuX = this.position.x + MENU_X
-  var menuY = this.position.y + MENU_Y
-  if(pointInBox(pos.x,pos.y,menuX,menuY,menuX + MENU_WIDTH, menuY + MENU_HEIGHT)){
+  var menuPos = this.findMenuStartPosition();
+  if(pointInBox(pos.x,pos.y,menuPos.x,menuPos.y,menuPos.x + MENU_WIDTH, menuPos.y + MENU_HEIGHT)){
     this.menuClickEvent();
     return true;
   }

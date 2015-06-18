@@ -1,8 +1,19 @@
 var Level = function() {
-  this.areas = LEVEL_TEMPLATE[0][0];
+  this.grid = new Grid(WIDTH/32, HEIGHT/32, 32);
+  //this.areas = LEVEL_TEMPLATE[0][0];
+  this.setUpAreas();
   this.guards = LEVEL_TEMPLATE[0][1];
   this.player = LEVEL_TEMPLATE[0][3];
   this.assignEvents();
+}
+
+Level.prototype.setUpAreas = function() {
+  this.areas = [];
+  for(var i = 0; i < LEVEL_TEMPLATE[0][0].length; i++) {
+    var tempObj = LEVEL_TEMPLATE[0][0][i];
+    var area = new Area(tempObj.x * 32, tempObj.y * 32, tempObj.width * 32, tempObj.height * 32, tempObj.elevation)
+    this.areas.push(area);
+  }
 }
 
 Level.prototype.startLevel = function() {

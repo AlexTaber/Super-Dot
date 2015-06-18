@@ -69,6 +69,11 @@ Area.prototype.draw = function() {
   game.graphics.drawRect(this.position.x, this.position.y, this.width, this.height);
   game.graphics.endFill();
 }
+var Grid = function(xCells, yCells, cellSize) {
+  this.xCells = xCells;
+  this.yCells = yCells;
+  this.cellSize = cellSize;
+}
 var Guard = function(x,y,elevation,title,points,direction) {
   this.startX = x;
   this.startY = y;
@@ -164,10 +169,21 @@ Guard.prototype.drawLOS = function() {
   game.graphics.lineStyle();
 }
 var Level = function() {
-  this.areas = LEVEL_TEMPLATE[0][0];
+  this.grid = new Grid(WIDTH/32, HEIGHT/32, 32);
+  //this.areas = LEVEL_TEMPLATE[0][0];
+  this.setUpAreas();
   this.guards = LEVEL_TEMPLATE[0][1];
   this.player = LEVEL_TEMPLATE[0][3];
   this.assignEvents();
+}
+
+Level.prototype.setUpAreas = function() {
+  this.areas = [];
+  for(var i = 0; i < LEVEL_TEMPLATE[0][0].length; i++) {
+    var tempObj = LEVEL_TEMPLATE[0][0][i];
+    var area = new Area(tempObj.x * 32, tempObj.y * 32, tempObj.width * 32, tempObj.height * 32, tempObj.elevation)
+    this.areas.push(area);
+  }
 }
 
 Level.prototype.startLevel = function() {
@@ -235,6 +251,12 @@ Level.prototype.checkAreaCollision = function(point1, point2, elevation) {
     }
   }
   return false;
+}
+function findPath(point1, point2) {
+  var points = [];
+  if(collisionBetweenPoints(point1,point2) === false) {
+    points.push
+  }
 }
 var Player = function(x,y,actionPoints,elevation,speed) {
   this.startX = x;
@@ -507,9 +529,8 @@ var Waypoint = function(x, y, player,action,duration,elevation) {
 
 Waypoint.prototype.menuClicked = function() {
   var pos = game.input.activePointer.position;
-  var menuX = this.position.x + MENU_X
-  var menuY = this.position.y + MENU_Y
-  if(pointInBox(pos.x,pos.y,menuX,menuY,menuX + MENU_WIDTH, menuY + MENU_HEIGHT)){
+  var menuPos = this.findMenuStartPosition();
+  if(pointInBox(pos.x,pos.y,menuPos.x,menuPos.y,menuPos.x + MENU_WIDTH, menuPos.y + MENU_HEIGHT)){
     this.menuClickEvent();
     return true;
   }
@@ -623,20 +644,35 @@ function setUpLevels() {
     [
       //area(x,y,width,height,elevation)
       [
-        new Area(0,150,WIDTH,150,0),
-        new Area(WIDTH * 0.2,300,WIDTH*0.2,120,0),
-        new Area(WIDTH * 0.8,300,WIDTH*0.2,120,0),
-        new Area(0,420,WIDTH,480,0),
-        new Area(0,0,WIDTH,100,3),
-        new Area(WIDTH * 0.2,100,WIDTH * 0.2,50,1),
-        new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
-        new Area(WIDTH * 0.4,100,WIDTH * 0.2,50,3),
-        new Area(0,100, WIDTH * 0.2, 50, 2),
-        new Area(WIDTH * 0.8,100, WIDTH * 0.2, 50, 2),
-        new Area(0, 300, WIDTH * 0.2, 40, 3),
-        new Area(0, 340, WIDTH * 0.2, 40, 2),
-        new Area(0, 380, WIDTH * 0.2, 40, 1),
-        new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
+        { x: 0, y: 0, width: 10, height: 3, elevation: 3 },
+        { x: 0, y: 3, width: 2, height: 2, elevation: 2 },
+        { x: 2, y: 3, width: 2, height: 2, elevation: 1 },
+        { x: 4, y: 3, width: 2, height: 2, elevation: 3 },
+        { x: 6, y: 3, width: 2, height: 2, elevation: 1 },
+        { x: 8, y: 3, width: 2, height: 2, elevation: 2 },
+        { x: 0, y: 5, width: 10, height: 4, elevation: 0 },
+        { x: 0, y: 9, width: 2, height: 2, elevation: 3 },
+        { x: 0, y: 11, width: 2, height: 2, elevation: 2 },
+        { x: 0, y: 13, width: 2, height: 2, elevation: 1 },
+        { x: 2, y: 9, width: 2, height: 6, elevation: 0 },
+        { x: 4, y: 9, width: 4, height: 4, elevation: 3 },
+        { x: 8, y: 9, width: 2, height: 6, elevation: 0 },
+        { x: 4, y: 13, width: 4, height: 2, elevation: 0 }
+
+        // new Area(0,150,WIDTH,150,0),
+        // new Area(WIDTH * 0.2,300,WIDTH*0.2,120,0),
+        // new Area(WIDTH * 0.8,300,WIDTH*0.2,120,0),
+        // new Area(0,420,WIDTH,480,0),
+        // new Area(0,0,WIDTH,100,3),
+        // new Area(WIDTH * 0.2,100,WIDTH * 0.2,50,1),
+        // new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
+        // new Area(WIDTH * 0.4,100,WIDTH * 0.2,50,3),
+        // new Area(0,100, WIDTH * 0.2, 50, 2),
+        // new Area(WIDTH * 0.8,100, WIDTH * 0.2, 50, 2),
+        // new Area(0, 300, WIDTH * 0.2, 40, 3),
+        // new Area(0, 340, WIDTH * 0.2, 40, 2),
+        // new Area(0, 380, WIDTH * 0.2, 40, 1),
+        // new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
       ],
       //guards(x,y,elevation,title,patrolPoints,direction)
       [

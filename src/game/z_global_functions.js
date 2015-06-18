@@ -25,20 +25,35 @@ function setUpLevels() {
     [
       //area(x,y,width,height,elevation)
       [
-        new Area(0,150,WIDTH,150,0),
-        new Area(WIDTH * 0.2,300,WIDTH*0.2,120,0),
-        new Area(WIDTH * 0.8,300,WIDTH*0.2,120,0),
-        new Area(0,420,WIDTH,480,0),
-        new Area(0,0,WIDTH,100,3),
-        new Area(WIDTH * 0.2,100,WIDTH * 0.2,50,1),
-        new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
-        new Area(WIDTH * 0.4,100,WIDTH * 0.2,50,3),
-        new Area(0,100, WIDTH * 0.2, 50, 2),
-        new Area(WIDTH * 0.8,100, WIDTH * 0.2, 50, 2),
-        new Area(0, 300, WIDTH * 0.2, 40, 3),
-        new Area(0, 340, WIDTH * 0.2, 40, 2),
-        new Area(0, 380, WIDTH * 0.2, 40, 1),
-        new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
+        { x: 0, y: 0, width: 10, height: 3, elevation: 3 },
+        { x: 0, y: 3, width: 2, height: 2, elevation: 2 },
+        { x: 2, y: 3, width: 2, height: 2, elevation: 1 },
+        { x: 4, y: 3, width: 2, height: 2, elevation: 3 },
+        { x: 6, y: 3, width: 2, height: 2, elevation: 1 },
+        { x: 8, y: 3, width: 2, height: 2, elevation: 2 },
+        { x: 0, y: 5, width: 10, height: 4, elevation: 0 },
+        { x: 0, y: 9, width: 2, height: 2, elevation: 3 },
+        { x: 0, y: 11, width: 2, height: 2, elevation: 2 },
+        { x: 0, y: 13, width: 2, height: 2, elevation: 1 },
+        { x: 2, y: 9, width: 2, height: 6, elevation: 0 },
+        { x: 4, y: 9, width: 4, height: 4, elevation: 3 },
+        { x: 8, y: 9, width: 2, height: 6, elevation: 0 },
+        { x: 4, y: 13, width: 4, height: 2, elevation: 0 }
+
+        // new Area(0,150,WIDTH,150,0),
+        // new Area(WIDTH * 0.2,300,WIDTH*0.2,120,0),
+        // new Area(WIDTH * 0.8,300,WIDTH*0.2,120,0),
+        // new Area(0,420,WIDTH,480,0),
+        // new Area(0,0,WIDTH,100,3),
+        // new Area(WIDTH * 0.2,100,WIDTH * 0.2,50,1),
+        // new Area(WIDTH * 0.6,100,WIDTH * 0.2,50,1),
+        // new Area(WIDTH * 0.4,100,WIDTH * 0.2,50,3),
+        // new Area(0,100, WIDTH * 0.2, 50, 2),
+        // new Area(WIDTH * 0.8,100, WIDTH * 0.2, 50, 2),
+        // new Area(0, 300, WIDTH * 0.2, 40, 3),
+        // new Area(0, 340, WIDTH * 0.2, 40, 2),
+        // new Area(0, 380, WIDTH * 0.2, 40, 1),
+        // new Area(WIDTH * 0.4, 300, WIDTH * 0.4, 120, 3)
       ],
       //guards(x,y,elevation,title,patrolPoints,direction)
       [
