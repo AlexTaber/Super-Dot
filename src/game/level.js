@@ -3,6 +3,9 @@ var Level = function() {
   this.guards = LEVEL_TEMPLATE[0][1];
   this.player = LEVEL_TEMPLATE[0][3];
   this.assignEvents();
+  this.pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
+  this.grids = [];
+  this.setUpGrids();
 }
 
 Level.prototype.setUpAreas = function() {
@@ -12,6 +15,24 @@ Level.prototype.setUpAreas = function() {
     var area = new Area(tempObj.x * CELL_SIZE, tempObj.y * CELL_SIZE, tempObj.width * CELL_SIZE, tempObj.height * CELL_SIZE, tempObj.elevation)
     this.areas.push(area);
   }
+}
+
+Level.prototype.setUpGrids = function() {
+  for(var i = 0; i < 4; i++) {
+    this.grids[i] = this.setUpGrid(i);
+  }
+}
+
+Level.prototype.setUpGrid = function(elevation) {
+  var grid = GRID.clone2dArray();
+  console.log(grid + " " + elevation);
+  for(var ai = 0; ai < this.areas.length; ai++) {
+    if(this.areas[ai].elevation != elevation) {
+      newGrid = grid.clone2dArray();
+      grid = this.areas[ai].setUpGrid(newGrid);
+    }
+  }
+  return grid;
 }
 
 Level.prototype.startLevel = function() {

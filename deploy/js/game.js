@@ -39,6 +39,20 @@ Area.prototype.setUpLines = function() {
   return [line1, line2]
 }
 
+Area.prototype.setUpGrid = function(grid) {
+  var myGrid = grid.clone2dArray();
+  var startX = this.position.x / CELL_SIZE;
+  var endX = (this.position.x + this.width) / CELL_SIZE
+  var startY = this.position.y / CELL_SIZE;
+  var endY = (this.position.y + this.height) / CELL_SIZE
+  for(var h = startY; h < endY; h++) {
+    for(var w = startX; w < endX; w++) {
+      myGrid[h].splice(w, 1, 1);
+    }
+  }
+  return myGrid;
+}
+
 Area.prototype.clicked = function() {
   var pos = game.input.activePointer.position;
   if(pointInBox(pos.x,pos.y,this.position.x,this.position.y,this.position.x + this.width, this.position.y + this.height)){
@@ -168,6 +182,9 @@ var Level = function() {
   this.guards = LEVEL_TEMPLATE[0][1];
   this.player = LEVEL_TEMPLATE[0][3];
   this.assignEvents();
+  this.pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
+  this.grids = [];
+  this.setUpGrids();
 }
 
 Level.prototype.setUpAreas = function() {
@@ -177,6 +194,24 @@ Level.prototype.setUpAreas = function() {
     var area = new Area(tempObj.x * CELL_SIZE, tempObj.y * CELL_SIZE, tempObj.width * CELL_SIZE, tempObj.height * CELL_SIZE, tempObj.elevation)
     this.areas.push(area);
   }
+}
+
+Level.prototype.setUpGrids = function() {
+  for(var i = 0; i < 4; i++) {
+    this.grids[i] = this.setUpGrid(i);
+  }
+}
+
+Level.prototype.setUpGrid = function(elevation) {
+  var grid = GRID.clone2dArray();
+  console.log(grid + " " + elevation);
+  for(var ai = 0; ai < this.areas.length; ai++) {
+    if(this.areas[ai].elevation != elevation) {
+      newGrid = grid.clone2dArray();
+      grid = this.areas[ai].setUpGrid(newGrid);
+    }
+  }
+  return grid;
 }
 
 Level.prototype.startLevel = function() {
@@ -1292,6 +1327,24 @@ MENU_Y = -32
 
 CELL_SIZE = 32;
 
+GRID = [
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0]
+]
+
 AREA_COLORS = [
   0xe5e5e5,
   0x999999,
@@ -1392,6 +1445,13 @@ function pointInBox(x,y,x1,y1,x2,y2) {
     }
   }
   return false;
+}
+
+Array.prototype.clone2dArray = function() {
+  var newArray = this.map(function(arr) {
+      return arr.slice();
+  });
+  return newArray;
 }
 /**
  *
