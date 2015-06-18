@@ -70,12 +70,17 @@ Player.prototype.pause = function() {
 Player.prototype.startPlayer = function() {
   var waypoint = this.waypoints[this.waypointIndex];
   if(waypoint) {
-    this.waypointIndex += 1;
-    this.tween=game.add.tween(this.position);
-    var distance = this.position.distance(waypoint.position)
+    if(waypoint.duration <= 0) {
+      this.waypointIndex += 1;
+      this.tween=game.add.tween(this.position);
+      var distance = this.position.distance(waypoint.position)
 
-    this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
-    this.tween.onComplete.add(waypoint.action, waypoint.listener);
+      this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+      this.tween.onComplete.add(waypoint.action, waypoint.listener);
+    } else {
+      game.time.events.add(waypoint.duration, waypoint.action, waypoint.listener);
+      waypoint.duration = 0;
+    }
   }
 }
 
