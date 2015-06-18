@@ -280,6 +280,26 @@ Level.prototype.checkAreaCollision = function(point1, point2, elevation) {
   }
   return false;
 }
+
+Level.prototype.pathTo = function(x,y,targetX, targetY) {
+  var elevation = game.curPlayer.waypoints.last().elevation;
+  var startX = Math.floor(x / CELL_SIZE);
+  var startY = Math.floor(y / CELL_SIZE);
+  var endX = Math.floor(targetX / CELL_SIZE);
+  var endY = Math.floor(targetY / CELL_SIZE);
+  this.pathfinder.setGrid(this.grids[elevation], 0);
+  this.pathfinder.setCallbackFunction(function(path) {
+    path = path || [];
+    //do stuff
+    console.log(path);
+    for(var i = 1; i < path.length; i++) {
+      game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
+    }
+  });
+
+  this.pathfinder.preparePathCalculation([startX,startY], [endX,endY]);
+  this.pathfinder.calculatePath();
+}
 function findPath(point1, point2) {
   var points = [];
   if(collisionBetweenPoints(point1,point2) === false) {
@@ -1069,15 +1089,16 @@ Player.prototype.findElevation = function(point) {
 }
 
 Player.prototype.setWaypoint = function() {
-  var areaElevation = this.findElevation(game.input.activePointer.position);
-  //check elevation
-  if(areaElevation == this.waypoints.last().elevation) {
-    //check for area in between
-    if(level.checkAreaCollision(this.waypoints.last().position, game.input.activePointer.position, this.waypoints.last().elevation) === false){
+  // var areaElevation = this.findElevation(game.input.activePointer.position);
+  // //check elevation
+  // if(areaElevation == this.waypoints.last().elevation) {
+  //   //check for area in between
+  //   if(level.checkAreaCollision(this.waypoints.last().position, game.input.activePointer.position, this.waypoints.last().elevation) === false){
       var pos = game.input.activePointer.position
-      game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this, Player.prototype.startPlayer,0,areaElevation));
-    }
-  }
+  //     game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this, Player.prototype.startPlayer,0,areaElevation));
+      level.pathTo(this.waypoints.last().position.x, this.waypoints.last().position.y, pos.x, pos.y);
+  //   }
+  // }
 }
 
 Player.prototype.setUpPowers = function() {
