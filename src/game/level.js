@@ -1,8 +1,38 @@
 var Level = function() {
-  this.areas = LEVEL_TEMPLATE[0][0];
+  this.setUpAreas();
   this.guards = LEVEL_TEMPLATE[0][1];
   this.player = LEVEL_TEMPLATE[0][3];
   this.assignEvents();
+  this.pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
+  this.grids = [];
+  this.setUpGrids();
+}
+
+Level.prototype.setUpAreas = function() {
+  this.areas = [];
+  for(var i = 0; i < LEVEL_TEMPLATE[0][0].length; i++) {
+    var tempObj = LEVEL_TEMPLATE[0][0][i];
+    var area = new Area(tempObj.x * CELL_SIZE, tempObj.y * CELL_SIZE, tempObj.width * CELL_SIZE, tempObj.height * CELL_SIZE, tempObj.elevation)
+    this.areas.push(area);
+  }
+}
+
+Level.prototype.setUpGrids = function() {
+  for(var i = 0; i < 4; i++) {
+    this.grids[i] = this.setUpGrid(i);
+  }
+}
+
+Level.prototype.setUpGrid = function(elevation) {
+  var grid = GRID.clone2dArray();
+  console.log(grid + " " + elevation);
+  for(var ai = 0; ai < this.areas.length; ai++) {
+    if(this.areas[ai].elevation != elevation) {
+      newGrid = grid.clone2dArray();
+      grid = this.areas[ai].setUpGrid(newGrid);
+    }
+  }
+  return grid;
 }
 
 Level.prototype.startLevel = function() {
@@ -70,4 +100,24 @@ Level.prototype.checkAreaCollision = function(point1, point2, elevation) {
     }
   }
   return false;
+}
+
+Level.prototype.pathTo = function(x,y,targetX, targetY) {
+  var elevation = game.curPlayer.waypoints.last().elevation;
+  var startX = Math.floor(x / CELL_SIZE);
+  var startY = Math.floor(y / CELL_SIZE);
+  var endX = Math.floor(targetX / CELL_SIZE);
+  var endY = Math.floor(targetY / CELL_SIZE);
+  this.pathfinder.setGrid(this.grids[elevation], 0);
+  this.pathfinder.setCallbackFunction(function(path) {
+    path = path || [];
+    //do stuff
+    console.log(path);
+    for(var i = 1; i < path.length; i++) {
+      game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
+    }
+  });
+
+  this.pathfinder.preparePathCalculation([startX,startY], [endX,endY]);
+  this.pathfinder.calculatePath();
 }

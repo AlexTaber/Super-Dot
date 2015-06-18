@@ -109,15 +109,16 @@ Player.prototype.findElevation = function(point) {
 }
 
 Player.prototype.setWaypoint = function() {
-  var areaElevation = this.findElevation(game.input.activePointer.position);
-  //check elevation
-  if(areaElevation == this.waypoints.last().elevation) {
-    //check for area in between
-    if(level.checkAreaCollision(this.waypoints.last().position, game.input.activePointer.position, this.waypoints.last().elevation) === false){
+  // var areaElevation = this.findElevation(game.input.activePointer.position);
+  // //check elevation
+  // if(areaElevation == this.waypoints.last().elevation) {
+  //   //check for area in between
+  //   if(level.checkAreaCollision(this.waypoints.last().position, game.input.activePointer.position, this.waypoints.last().elevation) === false){
       var pos = game.input.activePointer.position
-      game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this, Player.prototype.startPlayer,0,areaElevation));
-    }
-  }
+  //     game.curPlayer.waypoints.push(new Waypoint(pos.x, pos.y, this, Player.prototype.startPlayer,0,areaElevation));
+      level.pathTo(this.waypoints.last().position.x, this.waypoints.last().position.y, pos.x, pos.y);
+  //   }
+  // }
 }
 
 Player.prototype.setUpPowers = function() {

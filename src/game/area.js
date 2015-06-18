@@ -14,6 +14,20 @@ Area.prototype.setUpLines = function() {
   return [line1, line2]
 }
 
+Area.prototype.setUpGrid = function(grid) {
+  var myGrid = grid.clone2dArray();
+  var startX = this.position.x / CELL_SIZE;
+  var endX = (this.position.x + this.width) / CELL_SIZE
+  var startY = this.position.y / CELL_SIZE;
+  var endY = (this.position.y + this.height) / CELL_SIZE
+  for(var h = startY; h < endY; h++) {
+    for(var w = startX; w < endX; w++) {
+      myGrid[h].splice(w, 1, 1);
+    }
+  }
+  return myGrid;
+}
+
 Area.prototype.clicked = function() {
   var pos = game.input.activePointer.position;
   if(pointInBox(pos.x,pos.y,this.position.x,this.position.y,this.position.x + this.width, this.position.y + this.height)){
