@@ -119,8 +119,6 @@ Level.prototype.pathTo = function(x,y,targetX, targetY) {
       var plaPos = game.curPlayer.waypoints.last().position
       var check = (i == path.length - 1);
       level.pathPoint.set((path[i].x * CELL_SIZE) + 16, (path[i].y * CELL_SIZE) + 16);
-      console.log(plaPos);
-      console.log(level.pathPoint);
       if(level.checkAreaCollision(plaPos, level.pathPoint, elevation)) {
         game.curPlayer.waypoints.push(new Waypoint(path[i-1].x * CELL_SIZE + 16, path[i-1].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
         // game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));

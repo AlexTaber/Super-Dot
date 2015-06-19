@@ -298,8 +298,6 @@ Level.prototype.pathTo = function(x,y,targetX, targetY) {
       var plaPos = game.curPlayer.waypoints.last().position
       var check = (i == path.length - 1);
       level.pathPoint.set((path[i].x * CELL_SIZE) + 16, (path[i].y * CELL_SIZE) + 16);
-      console.log(plaPos);
-      console.log(level.pathPoint);
       if(level.checkAreaCollision(plaPos, level.pathPoint, elevation)) {
         game.curPlayer.waypoints.push(new Waypoint(path[i-1].x * CELL_SIZE + 16, path[i-1].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
         // game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
@@ -1268,7 +1266,7 @@ Timeline.prototype.resetTimeline = function() {
 var Waypoint = function(x, y, player,action,duration,elevation) {
   this.position = new Phaser.Point(x,y);
   this.player = player;
-  this.color = 0x66A3FF;
+  this.color = 0x0066FF;
   this.action = action;
   this.duration = duration;
   this.params = {}
@@ -1358,12 +1356,12 @@ WaypointMenu.prototype.draw = function() {
   }
 }
 Waypoint.prototype.draw = function(prevWaypoint) {
-  game.graphics.beginFill(this.color);
+  game.graphics.beginFill(this.color, 0.35);
   game.graphics.drawCircle(this.position.x,this.position.y,5);
   game.graphics.endFill();
 
   if(prevWaypoint) {
-    game.graphics.lineStyle(2,this.color);
+    game.graphics.lineStyle(2,this.color, 0.2);
     game.graphics.moveTo(this.position.x, this.position.y);
     game.graphics.lineTo(prevWaypoint.position.x, prevWaypoint.position.y);
     game.graphics.lineStyle();
