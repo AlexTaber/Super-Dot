@@ -1321,13 +1321,13 @@ var WaypointMenu = function() {
   this.alarmSprite.visible = false;
 }
 WaypointMenu.prototype.draw = function() {
-  if(game.curWaypoint){
+  if(game.curWaypoint && game.timelineRunning === false){
     this.alarmSprite.visible = true;
     this.alarmSprite.position.x = game.curWaypoint.position.x - 16 + (game.curWaypoint.duration / 50);
     this.alarmSprite.position.y = game.curWaypoint.position.y + 16;
     this.alarmSprite.inputEnabled = true;
 
-    if(this.alarmSprite.input.checkPointerDown(game.input.activePointer, true)){
+    if(this.alarmSprite.input.checkPointerDown(game.input.activePointer, true )){
       var rootPosX = game.curWaypoint.position.x - 16;
       var oriPosX = this.alarmSprite.position.x;
       var mPos = game.input.activePointer.position;
