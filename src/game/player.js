@@ -20,7 +20,7 @@ Player.prototype.clickEvent = function() {
     this.setAsCurPlayer();
   } //waypoint menu clicked
   else if(this.waypointMenuClicked()){
-
+    this.waypointMenuClicked()
   } // waypoint clicked
   else if(this.waypointClicked()) {
 
@@ -29,7 +29,9 @@ Player.prototype.clickEvent = function() {
     game.curPower.clickEvent();
   } // set waypoint
   else if(game.curPlayer == this) {
-    this.setWaypoint();
+    if(game.curWaypoint == null){
+      this.setWaypoint();
+    }
   }
 }
 
@@ -69,21 +71,35 @@ Player.prototype.pause = function() {
 
 Player.prototype.startPlayer = function() {
   var waypoint = this.waypoints[this.waypointIndex];
+  console.log(waypoint);
   if(waypoint) {
     this.waypointIndex += 1;
     this.tween=game.add.tween(this.position);
     var distance = this.position.distance(waypoint.position)
 
     this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
-    this.tween.onComplete.add(waypoint.action, waypoint.listener);
+
+    if(waypoint.duration <= 0 || waypoint.paused === true) {
+      this.tween.onComplete.add(waypoint.action, waypoint.listener);
+    } else {
+      this.tween.onComplete.add(waypoint.pause, waypoint);
+      waypoint.paused = true;
+    }
   }
 }
 
 Player.prototype.resetPlayer = function() {
   this.position.x = this.startX;
   this.position.y = this.startY;
+  this.resetWaypoints();
   this.waypointIndex = 1;
   this.tween.stop();
+}
+
+Player.prototype.resetWaypoints = function() {
+  for(var i = 0; i < this.waypoints.length; i++) {
+    this.waypoints[i].resetWaypoint();
+  }
 }
 
 Player.prototype.removeWaypoint = function() {
@@ -131,7 +147,6 @@ Player.prototype.setUpPowers = function() {
     pow.player = this;
     pow.clickState = newPow.clickState;
     pow.text = game.add.text(game.world.centerX, game.world.centerY, newPow.name, { font: "16px Arial", fill: "#CCCCCC", align: "center" });
-    console.log(pow.text);
     pow.text.visible = false;
   }
 }

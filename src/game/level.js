@@ -6,6 +6,7 @@ var Level = function() {
   this.pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
   this.grids = [];
   this.setUpGrids();
+  this.waypointMenu = new WaypointMenu();
 }
 
 Level.prototype.setUpAreas = function() {
@@ -25,7 +26,6 @@ Level.prototype.setUpGrids = function() {
 
 Level.prototype.setUpGrid = function(elevation) {
   var grid = GRID.clone2dArray();
-  console.log(grid + " " + elevation);
   for(var ai = 0; ai < this.areas.length; ai++) {
     if(this.areas[ai].elevation != elevation) {
       newGrid = grid.clone2dArray();
@@ -90,6 +90,8 @@ Level.prototype.draw = function() {
     }
     //player
     level.player.draw();
+    //menu
+    level.waypointMenu.draw();
   }
 }
 
@@ -112,7 +114,6 @@ Level.prototype.pathTo = function(x,y,targetX, targetY) {
   this.pathfinder.setCallbackFunction(function(path) {
     path = path || [];
     //do stuff
-    console.log(path);
     for(var i = 1; i < path.length; i++) {
       game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
     }
