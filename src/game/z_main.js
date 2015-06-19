@@ -26,7 +26,7 @@ var state = {
     },
     preload: function() {
         // STate preload logic goes here
-        setUpLevels();
+        game.apple = game.load.image('alarm', 'imgs/alarm.png');
 
         //inputs
         space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -37,6 +37,7 @@ var state = {
     },
     create: function(){
       // State create logic goes here
+      setUpLevels();
       game.areas = [];
       game.areas.push(new Area(50,100,AREA_COLORS[1]));
 

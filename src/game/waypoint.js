@@ -6,7 +6,8 @@ var Waypoint = function(x, y, player,action,duration,elevation) {
   this.duration = duration;
   this.params = {}
   this.listener = player;
-  this.elevation = elevation
+  this.elevation = elevation;
+  this.paused = false;
 }
 
 Waypoint.prototype.menuClicked = function() {
@@ -47,4 +48,12 @@ Waypoint.prototype.clickEvent = function() {
   } else {
     level.curWaypoint = this;
   }
+}
+
+Waypoint.prototype.pause = function() {
+  game.time.events.add(this.duration, this.action, this.listener);
+}
+
+Waypoint.prototype.resetWaypoint = function() {
+  this.paused = false;
 }

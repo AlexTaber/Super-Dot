@@ -185,6 +185,7 @@ var Level = function() {
   this.pathfinder = game.plugins.add(Phaser.Plugin.PathFinderPlugin);
   this.grids = [];
   this.setUpGrids();
+  this.waypointMenu = new WaypointMenu();
 }
 
 Level.prototype.setUpAreas = function() {
@@ -204,7 +205,6 @@ Level.prototype.setUpGrids = function() {
 
 Level.prototype.setUpGrid = function(elevation) {
   var grid = GRID.clone2dArray();
-  console.log(grid + " " + elevation);
   for(var ai = 0; ai < this.areas.length; ai++) {
     if(this.areas[ai].elevation != elevation) {
       newGrid = grid.clone2dArray();
@@ -269,6 +269,8 @@ Level.prototype.draw = function() {
     }
     //player
     level.player.draw();
+    //menu
+    level.waypointMenu.draw();
   }
 }
 
@@ -291,7 +293,6 @@ Level.prototype.pathTo = function(x,y,targetX, targetY) {
   this.pathfinder.setCallbackFunction(function(path) {
     path = path || [];
     //do stuff
-    console.log(path);
     for(var i = 1; i < path.length; i++) {
       game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
     }
@@ -1000,7 +1001,7 @@ Player.prototype.clickEvent = function() {
     this.setAsCurPlayer();
   } //waypoint menu clicked
   else if(this.waypointMenuClicked()){
-
+    this.waypointMenuClicked()
   } // waypoint clicked
   else if(this.waypointClicked()) {
 
@@ -1009,7 +1010,9 @@ Player.prototype.clickEvent = function() {
     game.curPower.clickEvent();
   } // set waypoint
   else if(game.curPlayer == this) {
-    this.setWaypoint();
+    if(game.curWaypoint == null){
+      this.setWaypoint();
+    }
   }
 }
 
@@ -1049,17 +1052,19 @@ Player.prototype.pause = function() {
 
 Player.prototype.startPlayer = function() {
   var waypoint = this.waypoints[this.waypointIndex];
+  console.log(waypoint);
   if(waypoint) {
-    if(waypoint.duration <= 0) {
-      this.waypointIndex += 1;
-      this.tween=game.add.tween(this.position);
-      var distance = this.position.distance(waypoint.position)
+    this.waypointIndex += 1;
+    this.tween=game.add.tween(this.position);
+    var distance = this.position.distance(waypoint.position)
 
-      this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+    this.tween.to({x: waypoint.position.x, y: waypoint.position.y}, (distance/this.speed) * 60, Phaser.Easing.Linear.None, true);
+
+    if(waypoint.duration <= 0 || waypoint.paused === true) {
       this.tween.onComplete.add(waypoint.action, waypoint.listener);
     } else {
-      game.time.events.add(waypoint.duration, waypoint.action, waypoint.listener);
-      waypoint.duration = 0;
+      this.tween.onComplete.add(waypoint.pause, waypoint);
+      waypoint.paused = true;
     }
   }
 }
@@ -1067,8 +1072,15 @@ Player.prototype.startPlayer = function() {
 Player.prototype.resetPlayer = function() {
   this.position.x = this.startX;
   this.position.y = this.startY;
+  this.resetWaypoints();
   this.waypointIndex = 1;
   this.tween.stop();
+}
+
+Player.prototype.resetWaypoints = function() {
+  for(var i = 0; i < this.waypoints.length; i++) {
+    this.waypoints[i].resetWaypoint();
+  }
 }
 
 Player.prototype.removeWaypoint = function() {
@@ -1116,7 +1128,6 @@ Player.prototype.setUpPowers = function() {
     pow.player = this;
     pow.clickState = newPow.clickState;
     pow.text = game.add.text(game.world.centerX, game.world.centerY, newPow.name, { font: "16px Arial", fill: "#CCCCCC", align: "center" });
-    console.log(pow.text);
     pow.text.visible = false;
   }
 }
@@ -1250,7 +1261,8 @@ var Waypoint = function(x, y, player,action,duration,elevation) {
   this.duration = duration;
   this.params = {}
   this.listener = player;
-  this.elevation = elevation
+  this.elevation = elevation;
+  this.paused = false;
 }
 
 Waypoint.prototype.menuClicked = function() {
@@ -1293,8 +1305,38 @@ Waypoint.prototype.clickEvent = function() {
   }
 }
 
+Waypoint.prototype.pause = function() {
+  game.time.events.add(this.duration, this.action, this.listener);
+}
+
+Waypoint.prototype.resetWaypoint = function() {
+  this.paused = false;
+}
+
 var WaypointMenu = function() {
-  this.alarmSprite = add.sprite(x,y,'alarm');
+  this.alarmSprite = game.add.sprite(0,0, 'alarm');
+  this.alarmSprite.anchor.x = 0.5;
+  this.alarmSprite.anchor.y = 0.5;
+  this.alarmSprite.scale.set(0.4,0.4);
+  this.alarmSprite.visible = false;
+}
+WaypointMenu.prototype.draw = function() {
+  if(game.curWaypoint){
+    this.alarmSprite.visible = true;
+    this.alarmSprite.position.x = game.curWaypoint.position.x - 16 + (game.curWaypoint.duration / 50);
+    this.alarmSprite.position.y = game.curWaypoint.position.y + 16;
+    this.alarmSprite.inputEnabled = true;
+
+    if(this.alarmSprite.input.checkPointerDown(game.input.activePointer, true)){
+      var rootPosX = game.curWaypoint.position.x - 16;
+      var oriPosX = this.alarmSprite.position.x;
+      var mPos = game.input.activePointer.position;
+      this.alarmSprite.position.x = Math.min(Math.max(mPos.x, rootPosX),rootPosX + 100);
+      game.curWaypoint.duration += (this.alarmSprite.position.x - oriPosX) * 50;
+    }
+  } else {
+    this.alarmSprite.visible = false;
+  }
 }
 Waypoint.prototype.draw = function(prevWaypoint) {
   game.graphics.beginFill(this.color);
@@ -1510,7 +1552,7 @@ var state = {
     },
     preload: function() {
         // STate preload logic goes here
-        setUpLevels();
+        game.apple = game.load.image('alarm', 'imgs/alarm.png');
 
         //inputs
         space = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -1521,6 +1563,7 @@ var state = {
     },
     create: function(){
       // State create logic goes here
+      setUpLevels();
       game.areas = [];
       game.areas.push(new Area(50,100,AREA_COLORS[1]));
 
