@@ -1319,20 +1319,27 @@ var WaypointMenu = function() {
   this.alarmSprite.anchor.y = 0.5;
   this.alarmSprite.scale.set(0.4,0.4);
   this.alarmSprite.visible = false;
+  this.alarmSprite.inputEnabled = true;
+  this.alarmSprite.input.enableDrag();
+  this.rect = new Phaser.Rectangle(0,0,DRAG_WIDTH,1);
+  this.alarmSprite.input.boundsRect = this.rect;
+  this.alarmSprite.events.onDragStop.add(this.dragStop, this);
+}
+
+WaypointMenu.prototype.dragStop = function() {
+  var rootPosX = game.curWaypoint.position.x - 16;
+  var sPosX = this.alarmSprite.position.x;
+  //this.alarmSprite.position.x = Math.min(Math.max(mPos.x, rootPosX),rootPosX + 100);
+  game.curWaypoint.duration = rootPosX + ((sPosX - rootPosX) * 50);
 }
 WaypointMenu.prototype.draw = function() {
   if(game.curWaypoint && game.timelineRunning === false){
     this.alarmSprite.visible = true;
-    this.alarmSprite.position.x = game.curWaypoint.position.x - 16 + (game.curWaypoint.duration / 50);
-    this.alarmSprite.position.y = game.curWaypoint.position.y + 16;
-    this.alarmSprite.inputEnabled = true;
-
-    if(this.alarmSprite.input.checkPointerDown(game.input.activePointer, true )){
-      var rootPosX = game.curWaypoint.position.x - 16;
-      var oriPosX = this.alarmSprite.position.x;
-      var mPos = game.input.activePointer.position;
-      this.alarmSprite.position.x = Math.min(Math.max(mPos.x, rootPosX),rootPosX + 100);
-      game.curWaypoint.duration += (this.alarmSprite.position.x - oriPosX) * 50;
+    var rectStart = (game.curWaypoint.position.x - 16) - 2;
+    this.rect.setTo(rectStart,game.curWaypoint.position.y + 16,DRAG_WIDTH,13);
+    if(this.alarmSprite.input.isDragged === false){
+      this.alarmSprite.position.x = game.curWaypoint.position.x - 16 + (game.curWaypoint.duration / 50);
+      this.alarmSprite.position.y = game.curWaypoint.position.y + 16;
     }
   } else {
     this.alarmSprite.visible = false;
@@ -1395,6 +1402,7 @@ MENU_WIDTH = 64;
 MENU_HEIGHT = 96;
 MENU_X = 32;
 MENU_Y = -32
+DRAG_WIDTH = 100;
 
 CELL_SIZE = 32;
 
