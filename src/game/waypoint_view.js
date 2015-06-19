@@ -1,10 +1,10 @@
 Waypoint.prototype.draw = function(prevWaypoint) {
-  game.graphics.beginFill(this.color);
+  game.graphics.beginFill(this.color, 0.35);
   game.graphics.drawCircle(this.position.x,this.position.y,5);
   game.graphics.endFill();
 
   if(prevWaypoint) {
-    game.graphics.lineStyle(2,this.color);
+    game.graphics.lineStyle(2,this.color, 0.2);
     game.graphics.moveTo(this.position.x, this.position.y);
     game.graphics.lineTo(prevWaypoint.position.x, prevWaypoint.position.y);
     game.graphics.lineStyle();

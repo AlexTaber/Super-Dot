@@ -7,6 +7,7 @@ var Level = function() {
   this.grids = [];
   this.setUpGrids();
   this.waypointMenu = new WaypointMenu();
+  this.pathPoint = new Phaser.Point();
 }
 
 Level.prototype.setUpAreas = function() {
@@ -115,7 +116,16 @@ Level.prototype.pathTo = function(x,y,targetX, targetY) {
     path = path || [];
     //do stuff
     for(var i = 1; i < path.length; i++) {
-      game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
+      var plaPos = game.curPlayer.waypoints.last().position
+      var check = (i == path.length - 1);
+      level.pathPoint.set((path[i].x * CELL_SIZE) + 16, (path[i].y * CELL_SIZE) + 16);
+      if(level.checkAreaCollision(plaPos, level.pathPoint, elevation)) {
+        game.curPlayer.waypoints.push(new Waypoint(path[i-1].x * CELL_SIZE + 16, path[i-1].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
+        // game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
+      }
+      if(check) {
+        game.curPlayer.waypoints.push(new Waypoint(path[i].x * CELL_SIZE + 16, path[i].y * CELL_SIZE + 16, game.curPlayer, Player.prototype.startPlayer,0,elevation));
+      }
     }
   });
 

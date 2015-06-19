@@ -1,7 +1,7 @@
 var Waypoint = function(x, y, player,action,duration,elevation) {
   this.position = new Phaser.Point(x,y);
   this.player = player;
-  this.color = 0x66A3FF;
+  this.color = 0x0066FF;
   this.action = action;
   this.duration = duration;
   this.params = {}
